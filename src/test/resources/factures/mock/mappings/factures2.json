@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/rechercherFactures2"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+       "structure": {
+        "donnees": "${WireMockCsv}"
+      },
+      "query":"SELECT * FROM facture f where '${clientCode}' = '' OR '${clientCode}' = f.\"clientCode\"",
+      "resultType": "list",
+      "subqueries": {
+        "nombreLignes": {
+          "query": "select count(*) from ligne_facture l where l.\"factureCode\" = '${code}'",
+          "resultType": "value"
+        }
+      }
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

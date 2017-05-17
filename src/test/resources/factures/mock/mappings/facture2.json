@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/recupererFacture2",
+    "queryParameters" : {
+      "factureCode" : {
+        "matches" : "..*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":"SELECT * FROM facture WHERE \"code\" = '${factureCode}'",
+      "resultType":"object",
+      "subqueries": {
+        "client": {
+          "query": "SELECT * FROM client WHERE \"code\" = '${clientCode}'",
+          "resultType":"object"
+        }
+      }
+      
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

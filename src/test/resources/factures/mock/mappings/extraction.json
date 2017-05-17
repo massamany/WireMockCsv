@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/extraction"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "subqueries": {
+        "factures": {
+          "query": "SELECT * FROM facture"
+        },
+        "clients": {
+          "query": "SELECT * FROM client"
+        },
+        "articles": {
+          "query": "SELECT * FROM article"
+        }
+      }
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

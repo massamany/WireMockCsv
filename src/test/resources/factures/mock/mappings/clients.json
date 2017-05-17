@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/rechercherClients"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":"SELECT c.* FROM client c WHERE c.\"nom\" like '%${filtreNom}%' and c.\"prenom\" like '%${filtrePrenom}%'"
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

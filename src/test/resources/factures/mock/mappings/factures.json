@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/rechercherFactures"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "structure": {
+        "donnees": "${WireMockCsv}"
+      },
+      "query":"SELECT f.*, (select count(*) from ligne_facture l where l.\"factureCode\" = f.\"code\") as \"nombreLignes\" FROM facture f where '${clientCode}' = '' OR '${clientCode}' = f.\"clientCode\""
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

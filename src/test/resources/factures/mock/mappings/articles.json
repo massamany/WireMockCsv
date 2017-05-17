@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/rechercherArticles"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":"SELECT a.* FROM article a WHERE a.\"libelle\" like '%${filtreLibelle}%'"
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

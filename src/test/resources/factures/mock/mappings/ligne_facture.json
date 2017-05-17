@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/recupererLigneFacture",
+    "queryParameters" : {
+      "ligneFactureCode" : {
+        "matches" : "..*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":"SELECT l.*, a.\"code\" as \"article__code\", a.\"libelle\" as \"article__libelle\", a.\"prix\" as \"article__prix\", f.\"code\" as \"facture__code\", f.\"clientCode\" as \"facture__clientCode\", f.\"dateCommande\" as \"facture__dateCommande\", f.\"nombreDePoints\" as \"facture__nombreDePoints\", c.\"code\" as \"facture__client__code\", c.\"civilite\" as \"facture__client__civilite\", c.\"nom\" as \"facture__client__nom\", c.\"prenom\" as \"facture__client__prenom\" FROM ligne_facture l JOIN article a ON l.\"articleCode\" = a.\"code\" JOIN facture f ON l.\"factureCode\" = f.\"code\" JOIN client c ON f.\"clientCode\" = c.\"code\" WHERE l.\"code\" = '${ligneFactureCode}'",
+      "resultType":"object"
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}
