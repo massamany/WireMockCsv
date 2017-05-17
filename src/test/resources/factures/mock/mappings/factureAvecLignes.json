@@ -18,7 +18,11 @@
           "query": "SELECT l.* FROM ligne_facture l WHERE l.\"factureCode\" = '${code}'"
         }
       },
-      "resultType":"object"
+      "resultType":"object",
+      "no-lines": {
+        "status": 404,
+        "statusMessage": "No data."
+      }
     },
     "transformers": ["wiremock-csv"]
   }

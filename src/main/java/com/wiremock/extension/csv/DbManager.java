@@ -23,7 +23,7 @@ public class DbManager {
 	private Connection dbConnection;
 
 	/**
-	 * constructor
+	 * Constructor
 	 *
 	 */
 	public DbManager(final String csvPath) {
@@ -46,7 +46,7 @@ public class DbManager {
 	}
 
 	/**
-	 * deconnexion de la base de donnée
+	 * Deconnexion de la base de donnée
 	 *
 	 */
 	public void dbDisconnect() throws WireMockCsvException {
@@ -62,7 +62,7 @@ public class DbManager {
 	}
 
 	/**
-	 * fonction permettant de faire la requete SQL qui sera transmise dans un fichier Csv
+	 * Fonction permettant d'exécuter la requete SQL de lecture dont le résultat sera retourné.
 	 *
 	 * @param querySQL
 	 * @param aliases

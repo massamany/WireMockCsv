@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.extension.responsetemplating.ListOrSingle
 import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.Response;
+import com.github.tomakehurst.wiremock.http.Response.Builder;
 import com.wiremock.extension.csv.QueryResults.QueryResult;
 
 /**
@@ -75,8 +76,22 @@ public class WireMockCsv extends ResponseTransformer {
 			}
 
 			final QueryResults qr = this.executeQueries(request, null, queries);
-			return Response.Builder.like(response).but().body(jsonStructure.replace("\"${WireMockCsv}\"", this.convJson.convertToJson(qr)))
-					.build();
+			Builder builder = Response.Builder.like(response).but().body(
+					jsonStructure
+					.replace("\"${WireMockCsv}\"", "${WireMockCsv}")
+					.replace("${WireMockCsv}", this.convJson.convertToJson(qr))
+			);
+			if (qr.getLines().isEmpty() && parameters.containsKey("no-lines")) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> noLines = (Map<String, Object>) parameters.get("no-lines");
+				if (noLines.containsKey("status")) {
+					builder.status((Integer) noLines.get("status"));
+				}
+				if (noLines.containsKey("statusMessage")) {
+					builder.statusMessage((String) noLines.get("statusMessage"));
+				}
+			}
+			return builder.build();
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
 			throw new RuntimeException(e);

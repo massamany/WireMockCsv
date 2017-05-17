@@ -50,15 +50,16 @@ The request allows:
 
 ### Building the request
 A request is composed by several components:
-* "query" : A SQL request, potentially parameterized with HTTP request parameters or "mother" query results (for sub-queries):
+* "query": A SQL request, potentially parameterized with HTTP request parameters or "mother" query results (for sub-queries):
     * A parameter is declared as follows: ${myParameter}
     * Main query: It will be replaced with the value of the HTTP parameter with the same name.
     * Sub-query: It will be replaced with the value of the column with the same name, or if not found with the value of the HTTP parameter with the same name.
     * A parameter with no replacement values will be replaced by an empty String.
-* "mask" : A list of column names of the query results which will not appear in the generated JSON. This allows retrieving values to use as parameters for sub-requests. Other trick, use "select*" and mask one column instead of listing all needed columns, the request will be sorter.
-* "aliases" : Alternative to parameter sub-objects and fields names, instead of using columns names.
-* "subqueries" : It's simply a list of Map [String ; Request]. The key is the JSON field name of the future sub-list or sub-object to retrieve and the request is again all of the components "query", "subqueries", ... It's hence possible to interlock an infinite number of sub-requests.
-* "resultType" : Tells if the expected result is a value ("value"), a unique object ("object") or a list ("list"). List by default. If "object" and several objects returned by the query, then only the first one is taken into account, the others are ignored. If "value" and several columns, then only the first one is taken into account, the others are ignored.
+* "mask": A list of column names of the query results which will not appear in the generated JSON. This allows retrieving values to use as parameters for sub-requests. Other trick, use "select*" and mask one column instead of listing all needed columns, the request will be sorter.
+* "aliases": Alternative to parameter sub-objects and fields names, instead of using columns names.
+* "subqueries": It's simply a list of Map [String ; Request]. The key is the JSON field name of the future sub-list or sub-object to retrieve and the request is again all of the components "query", "subqueries", etc ... (except "no-lines). It's hence possible to interlock an infinite number of sub-requests.
+* "resultType": Tells if the expected result is a value ("value"), a unique object ("object") or a list ("list"). List by default. If "object" and several objects returned by the query, then only the first one is taken into account, the others are ignored. If "value" and several columns, then only the first one is taken into account, the others are ignored.
+* "no-lines": If no lines are returned by the SQL query, the HTTP status and status message can be overriden with this parameter.
 
 The SQL columns names or the SQL alias given while querying provide directly the JSON field name.
 Example: `select "myField" from my_table`
@@ -166,6 +167,10 @@ Finally, a SQL query can be long and difficult to read if on one line. JSon does
 	            }
 	          },
 	          "mask": ["externalCode", "otherFieldToHide"]
+	        },
+	        "no-lines": {
+	          "status": 404,
+	          "statusMessage": "No data."
 	        }
 	      }
 	    },
@@ -217,9 +222,10 @@ The different SQL queries present some examples allowing filtering, count, valid
 * Retrieve an invoice line, with article and invoice sub-objects and with client sub-sub-object for the invoice
 	* http://localhost:8181/recupererLigneFacture?ligneFactureCode=L01_01
 	
-* Retrieve an invoice, with client sub-object and sub-list of lines
+* Retrieve an invoice, with client sub-object and sub-list of lines, and handling the absence of data
 	* http://localhost:8181/recupererFactureAvecLignes?factureCode=FAC01
-	
+	* http://localhost:8181/recupererFactureAvecLignes?factureCode=NOT_EXISTING
+
 * Retrieve a client with sub-lists of addresses and invoices, each invoice with a sub-list of lines, each line with an article sub-object. With or without filtering. Two different syntax demonstrated
 	* http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01
 	* http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01&dateCommandeMin=2017-03-01
@@ -285,8 +291,9 @@ Un requêtage est constitué de plusieurs composants :
     * Un paramètre n'ayant pas de valeur de remplacement sera remplacé par une chaîne vide
 * "mask" : Une liste des noms de colonnes résultats de la requête principale qui n'apparaîtront pas dans le JSon final, ceci permettant de récupérer des valeurs pour un paramètre de sous-requête. Autre avantage, utiliser le "select *" et supprimer une colonne du résultat afin d'obtenir requête moins verbeuse.
 * "aliases" : Alternative pour paramétrer les noms de sous-objets et de champs, évitant d'utiliser les alias de nom colonne.
-* "subqueries" : Il s'agit en fait simplement d'une Liste de Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", ... Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
+* "subqueries" : Il s'agit en fait simplement d'une Liste de Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "no-lines"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
 * "resultType" : Si le résultat attendu est une valeur ("value"), un objet unique ("object") ou une liste ("list"). Liste  par défaut. Si "object" et plusieurs objet renvoyés par la requête, alors le premier est pris en compte, les autres sont ignorés. Si "value" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées.
+* "no-lines" : Si aucune ligne n'est retournée par la requête SQL, le statut et le message de statut HTTP peuvent être surchargés via ce paramètre.
 
 Les noms des colonnes SQL ou des alias donnés lors du requêtage donne directement le nom du champ en JSON.
 Exemple : `select "monChamp" from ma_table`
@@ -394,6 +401,10 @@ Enfin, une query pouvant éventuellement être longue et JSon ne supportant pas 
 	            }
 	          },
 	          "mask": ["externalCode", "autreChampACacher"]
+	        },
+	        "no-lines": {
+	          "status": 404,
+	          "statusMessage": "No data."
 	        }
 	      }
 	    },
@@ -429,7 +440,7 @@ Les différentes requêtes SQL présentent quelques exemples d'astuces permettan
 	* http://localhost:8181/rechercherArticles
 	* http://localhost:8181/rechercherArticles?filtreLibelle=Cla
 	
-* Recherche de factures avec ou sans filtre, avec agrégation de données et changement de structure de résultat. Deux syntaxes présentées.
+* Recherche de factures avec ou sans filtre, avec agrégation de données et changement de structure de résultat. Deux syntaxes présentées
 	* http://localhost:8181/rechercherFactures
 	* http://localhost:8181/rechercherFactures?clientCode=CLI01
 	* http://localhost:8181/rechercherFactures?clientCode=CLI02
@@ -444,10 +455,11 @@ Les différentes requêtes SQL présentent quelques exemples d'astuces permettan
 * Récupérer une ligne de facture, avec sous-objets article et facture avec lui-même le sous-sous-objet client
 	* http://localhost:8181/recupererLigneFacture?ligneFactureCode=L01_01
 	
-* Récupérer une facture, avec sous-objet client et sous-liste de lignes
+* Récupérer une facture, avec sous-objet client et sous-liste de lignes, et gestion de l'absence de données
 	* http://localhost:8181/recupererFactureAvecLignes?factureCode=FAC01
+	* http://localhost:8181/recupererFactureAvecLignes?factureCode=NOT_EXISTING
 	
-* Récupérer un client avec sous-listes d'adresses et de factures, elle-même avec sous-liste de lignes, elle-même avec sous-objet article. Avec ou sans filtre. Deux syntaxes différentes présentées.
+* Récupérer un client avec sous-listes d'adresses et de factures, elle-même avec sous-liste de lignes, elle-même avec sous-objet article. Avec ou sans filtre. Deux syntaxes différentes présentées
 	* http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01
 	* http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01&dateCommandeMin=2017-03-01
 	* http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle2?clientCode=CLI01
