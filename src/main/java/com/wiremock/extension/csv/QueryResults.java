@@ -1,3 +1,7 @@
+/**
+ * Copyright 2017.
+ */
+
 package com.wiremock.extension.csv;
 
 import java.sql.ResultSet;
@@ -93,10 +97,10 @@ public class QueryResults {
 	}
 
 	public String getResultType() {
-		return resultType;
+		return this.resultType;
 	}
 
-	public void setResultType(String resultType) {
+	public void setResultType(final String resultType) {
 		this.resultType = resultType;
 	}
 

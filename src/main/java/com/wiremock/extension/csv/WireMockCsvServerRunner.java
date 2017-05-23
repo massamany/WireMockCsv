@@ -1,3 +1,7 @@
+/**
+ * Copyright 2017.
+ */
+
 package com.wiremock.extension.csv;
 
 import com.github.tomakehurst.wiremock.standalone.CommandLineOptions;

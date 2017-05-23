@@ -33,13 +33,21 @@ public class WireMockCsv extends ResponseTransformer {
 
 	private final DbManager manager;
 	private final ConvJson convJson;
+	private final Map<String, Object> config;
 
 	public WireMockCsv() throws WireMockCsvException {
 		try {
+			this.convJson = new ConvJson();
+
 			this.manager = new DbManager(WireMockCsvServerRunner.filesRoot() + File.separatorChar + "csv" + File.separatorChar + "Database");
 			this.manager.dbConnect();
 
-			this.convJson = new ConvJson();
+			final File configFile = new File(WireMockCsvServerRunner.filesRoot() + File.separatorChar + "csv" + File.separatorChar + "WireMockCsv.json.conf");
+			if (configFile.exists()) {
+				this.config = Collections.unmodifiableMap(this.convJson.readJsonToMap(configFile));
+			} else {
+				this.config = Collections.emptyMap();
+			}
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
 			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.");
@@ -60,37 +68,37 @@ public class WireMockCsv extends ResponseTransformer {
 	public Response transform(final Request request, final Response response, final FileSource files,
 			final Parameters parameters) {
 		try {
-			final Map<String, Object> queries = new HashMap<>();
-			queries.put("query", parameters.get("query"));
-			queries.put("subqueries", parameters.get("subqueries"));
-			queries.put("mask", parameters.get("mask"));
-			queries.put("aliases", parameters.get("aliases"));
-			queries.put("resultType", parameters.get("resultType"));
-			
-			Object structure = parameters.get("structure");
+			final Map<String, Object> queries = this.getQueriesConfig(parameters);
+
+			final Object structure = queries.get("structure");
 			String jsonStructure;
 			if (structure == null) {
-				jsonStructure = "{\"data\": \"${WireMockCsv}\" }";
+				jsonStructure = "${WireMockCsv}";
 			} else {
-				jsonStructure = this.convJson.convertObjectToJson(structure);
+				jsonStructure = structure instanceof String ? (String) structure : this.convJson.convertObjectToJson(structure);
 			}
 
 			final QueryResults qr = this.executeQueries(request, null, queries);
-			Builder builder = Response.Builder.like(response).but().body(
-					jsonStructure
+			final Builder builder = Response.Builder.like(response).but();
+			String body = jsonStructure
 					.replace("\"${WireMockCsv}\"", "${WireMockCsv}")
-					.replace("${WireMockCsv}", this.convJson.convertToJson(qr))
-			);
-			if (qr.getLines().isEmpty() && parameters.containsKey("no-lines")) {
+					.replace("${WireMockCsv}", this.convJson.convertToJson(qr));
+			if (qr.getLines().isEmpty() && queries.containsKey("no-lines")) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> noLines = (Map<String, Object>) parameters.get("no-lines");
+				final
+				Map<String, Object> noLines = (Map<String, Object>) queries.get("no-lines");
 				if (noLines.containsKey("status")) {
 					builder.status((Integer) noLines.get("status"));
 				}
 				if (noLines.containsKey("statusMessage")) {
 					builder.statusMessage((String) noLines.get("statusMessage"));
 				}
+				if (noLines.containsKey("response")) {
+					final Object responseNotFound = noLines.get("response");
+					body = responseNotFound instanceof String ? (String) responseNotFound : this.convJson.convertObjectToJson(responseNotFound);
+				}
 			}
+			builder.body(this.convJson.formatJson(body));
 			return builder.build();
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
@@ -190,5 +198,23 @@ public class WireMockCsv extends ResponseTransformer {
 		newQuerySQL = newQuerySQL.replaceAll("\\$\\{[^\\}]*\\}", "");
 
 		return newQuerySQL;
+	}
+
+	private Map<String, Object> getQueriesConfig(final Parameters parameters) {
+		final Map<String, Object> queries = new HashMap<>(this.config);
+		this.putConfigParameter(parameters, queries, "structure");
+		this.putConfigParameter(parameters, queries, "query");
+		this.putConfigParameter(parameters, queries, "subqueries");
+		this.putConfigParameter(parameters, queries, "mask");
+		this.putConfigParameter(parameters, queries, "aliases");
+		this.putConfigParameter(parameters, queries, "resultType");
+		this.putConfigParameter(parameters, queries, "no-lines");
+		return queries;
+	}
+
+	private void putConfigParameter(final Parameters parameters, final Map<String, Object> queries, final String key) {
+		if (parameters.containsKey(key)) {
+			queries.put(key, parameters.get(key));
+		}
 	}
 }

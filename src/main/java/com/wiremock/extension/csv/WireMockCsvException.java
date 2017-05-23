@@ -1,3 +1,7 @@
+/**
+ * Copyright 2017.
+ */
+
 package com.wiremock.extension.csv;
 
 /**
