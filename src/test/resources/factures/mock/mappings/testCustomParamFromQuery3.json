@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/testCustomParamFromQuery3",
+    "queryParameters" : {
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "customParameters": {
+        "array_client_data": {
+          "action": "fromQuery",
+          "query": "select \"civilite\", \"prenom\", \"nom\" from client limit 1"
+        },
+        "escaped_array_client_data": {
+          "action": "escapeSql",
+          "sourceParam": "array_client_data"
+        },
+        "string_client_data": {
+          "action": "concatenate",
+          "sourceParam": "escaped_array_client_data",
+          "prefix": "first client''s data: ",
+          "separator": " "
+        }
+      },
+      "query": "values('${string_client_data}')",
+      "resultType": "value"
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

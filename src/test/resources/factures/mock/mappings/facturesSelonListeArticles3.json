@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/rechercherFacturesSelonListeArticles3",
+    "queryParameters" : {
+      "articleCode" : {
+        "matches" : "..*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "customParameters": {
+        "articleCodesIn": {
+          "action": "concatenate",
+          "sourceParam": "articleCode",
+          "prefix": "('",
+          "suffix": "')",
+          "separator": "','"
+        }
+      },
+      "query":["SELECT DISTINCT f.*, c.\"code\" as \"client__code\", c.\"civilite\" as \"client__civilite\", c.\"nom\" as \"client__nom\", c.\"prenom\" as \"client__prenom\"",
+      "FROM facture f JOIN client c ON f.\"clientCode\" = c.\"code\" JOIN ligne_facture lf ON lf.\"factureCode\" = f.\"code\" JOIN article a ON lf.\"articleCode\" = a.\"code\"",
+      "WHERE a.\"code\" in ${articleCodesIn}"]
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

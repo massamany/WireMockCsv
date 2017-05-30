@@ -19,7 +19,7 @@
         }
       },
       "resultType":"object",
-      "no-lines": {
+      "noLines": {
         "status": 404,
         "statusMessage": "No data."
       }

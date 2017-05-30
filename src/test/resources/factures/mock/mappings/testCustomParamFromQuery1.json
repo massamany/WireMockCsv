@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/testCustomParamFromQuery1",
+    "queryParameters" : {
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "customParameters": {
+        "array_invoice_codes": {
+          "action": "fromQuery",
+          "query": "select \"code\" from facture"
+        },
+        "string_invoice_codes": {
+          "action": "concatenate",
+          "sourceParam": "array_invoice_codes",
+          "prefix": "all invoice codes: ",
+          "separator": " ; "
+        }
+      },
+      "query": "values('${string_invoice_codes}')",
+      "resultType": "value"
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}
