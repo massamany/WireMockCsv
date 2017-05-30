@@ -22,12 +22,12 @@ import com.wiremock.extension.csv.QueryResults.QueryResult;
  * Convertisseur de {@link QueryResults} en JSon ou en List de Map.
  *
  */
-public class ConvJson {
+public class JsonConverter {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	private static final ObjectWriter INDENT_MAPPER = ConvJson.MAPPER.writerWithDefaultPrettyPrinter();
+	private static final ObjectWriter INDENT_MAPPER = JsonConverter.MAPPER.writerWithDefaultPrettyPrinter();
 
-	public ConvJson() {
+	public JsonConverter() {
 	}
 
 	/**
@@ -36,8 +36,8 @@ public class ConvJson {
 	 */
 	public String formatJson(final String json) throws WireMockCsvException {
 		try {
-			final Object obj = ConvJson.MAPPER.readValue(json, Object.class);
-			return ConvJson.INDENT_MAPPER.writeValueAsString(obj);
+			final Object obj = JsonConverter.MAPPER.readValue(json, Object.class);
+			return JsonConverter.INDENT_MAPPER.writeValueAsString(obj);
 		} catch (final IOException e) {
 			throw new WireMockCsvException("Erreur lors de la formatage du JSON : " + e.getMessage(), e);
 		}
@@ -49,7 +49,7 @@ public class ConvJson {
 	public String convertObjectToJson(final Object object) throws WireMockCsvException {
 		WireMockConfiguration.wireMockConfig().notifier().info("Converting object to JSON");
 		try {
-			return ConvJson.MAPPER.writeValueAsString(object);
+			return JsonConverter.MAPPER.writeValueAsString(object);
 		} catch (final JsonProcessingException e) {
 			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
 		}
@@ -62,7 +62,7 @@ public class ConvJson {
 	public Map<String, Object> readJsonToMap(final File jsonFile) throws WireMockCsvException {
 		WireMockConfiguration.wireMockConfig().notifier().info("Converting JSON to map");
 		try {
-			return ConvJson.MAPPER.readValue(jsonFile, Map.class);
+			return JsonConverter.MAPPER.readValue(jsonFile, Map.class);
 		} catch (final JsonProcessingException e) {
 			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
 		} catch (final IOException e) {
@@ -76,7 +76,7 @@ public class ConvJson {
 	public String convertToJson(final QueryResults qr) throws WireMockCsvException {
 		WireMockConfiguration.wireMockConfig().notifier().info("Converting to JSON");
 		try {
-			return ConvJson.MAPPER.writeValueAsString(this.convert(qr));
+			return JsonConverter.MAPPER.writeValueAsString(this.convert(qr));
 		} catch (final JsonProcessingException e) {
 			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
 		}

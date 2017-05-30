@@ -32,19 +32,19 @@ import com.wiremock.extension.csv.QueryResults.QueryResult;
 public class WireMockCsv extends ResponseTransformer {
 
 	private final DbManager manager;
-	private final ConvJson convJson;
+	private final JsonConverter jsonConverter;
 	private final Map<String, Object> config;
 
 	public WireMockCsv() throws WireMockCsvException {
 		try {
-			this.convJson = new ConvJson();
+			this.jsonConverter = new JsonConverter();
 
 			this.manager = new DbManager(WireMockCsvServerRunner.filesRoot() + File.separatorChar + "csv" + File.separatorChar + "Database");
 			this.manager.dbConnect();
 
 			final File configFile = new File(WireMockCsvServerRunner.filesRoot() + File.separatorChar + "csv" + File.separatorChar + "WireMockCsv.json.conf");
 			if (configFile.exists()) {
-				this.config = Collections.unmodifiableMap(this.convJson.readJsonToMap(configFile));
+				this.config = Collections.unmodifiableMap(this.jsonConverter.readJsonToMap(configFile));
 			} else {
 				this.config = Collections.emptyMap();
 			}
@@ -75,14 +75,14 @@ public class WireMockCsv extends ResponseTransformer {
 			if (structure == null) {
 				jsonStructure = "${WireMockCsv}";
 			} else {
-				jsonStructure = structure instanceof String ? (String) structure : this.convJson.convertObjectToJson(structure);
+				jsonStructure = structure instanceof String ? (String) structure : this.jsonConverter.convertObjectToJson(structure);
 			}
 
 			final QueryResults qr = this.executeQueries(request, null, queries);
 			final Builder builder = Response.Builder.like(response).but();
 			String body = jsonStructure
 					.replace("\"${WireMockCsv}\"", "${WireMockCsv}")
-					.replace("${WireMockCsv}", this.convJson.convertToJson(qr));
+					.replace("${WireMockCsv}", this.jsonConverter.convertToJson(qr));
 			if (qr.getLines().isEmpty() && queries.containsKey("no-lines")) {
 				@SuppressWarnings("unchecked")
 				final
@@ -95,10 +95,10 @@ public class WireMockCsv extends ResponseTransformer {
 				}
 				if (noLines.containsKey("response")) {
 					final Object responseNotFound = noLines.get("response");
-					body = responseNotFound instanceof String ? (String) responseNotFound : this.convJson.convertObjectToJson(responseNotFound);
+					body = responseNotFound instanceof String ? (String) responseNotFound : this.jsonConverter.convertObjectToJson(responseNotFound);
 				}
 			}
-			builder.body(this.convJson.formatJson(body));
+			builder.body(this.jsonConverter.formatJson(body));
 			return builder.build();
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
