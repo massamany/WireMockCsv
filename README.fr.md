@@ -291,8 +291,8 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 
 * Recherche de clients avec ou sans filtre
     * http://localhost:8181/rechercherClients
-    * http://localhost:8181/rechercherClients?filtreNom=Jo
-    * http://localhost:8181/rechercherClients?filtreNom=Jo&filtrePrenom=Do
+    * http://localhost:8181/rechercherClients?filtrePrenom=Jo
+    * http://localhost:8181/rechercherClients?filtrePrenom=Jo&filtreNom=Do
 
 * Récupérer un client, avec agrégation de données
     * http://localhost:8181/recupererClient?clientCode=CLI01

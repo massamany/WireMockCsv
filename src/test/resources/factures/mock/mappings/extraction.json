@@ -17,7 +17,8 @@
         "articles": {
           "query": "SELECT * FROM article"
         }
-      }
+      },
+      "resultType":"object"
     },
     "transformers": ["wiremock-csv"]
   }
