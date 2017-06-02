@@ -15,7 +15,6 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.wiremock.extension.csv.QueryResults.QueryResult;
 
 /**
@@ -47,7 +46,6 @@ public class JsonConverter {
 	 * Conversion d'un objet quelconque en json.
 	 */
 	public String convertObjectToJson(final Object object) throws WireMockCsvException {
-		WireMockConfiguration.wireMockConfig().notifier().info("Converting object to JSON");
 		try {
 			return JsonConverter.MAPPER.writeValueAsString(object);
 		} catch (final JsonProcessingException e) {
@@ -60,7 +58,6 @@ public class JsonConverter {
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> readJsonToMap(final File jsonFile) throws WireMockCsvException {
-		WireMockConfiguration.wireMockConfig().notifier().info("Converting JSON to map");
 		try {
 			return JsonConverter.MAPPER.readValue(jsonFile, Map.class);
 		} catch (final JsonProcessingException e) {
@@ -74,7 +71,6 @@ public class JsonConverter {
 	 * Conversion du {@link QueryResults} en json
 	 */
 	public String convertToJson(final QueryResults qr) throws WireMockCsvException {
-		WireMockConfiguration.wireMockConfig().notifier().info("Converting to JSON");
 		try {
 			return JsonConverter.MAPPER.writeValueAsString(this.convert(qr));
 		} catch (final JsonProcessingException e) {

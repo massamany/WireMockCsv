@@ -11,8 +11,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-
 /**
  * Gestionnaire minimaliste de connexion à la base CSV.
  *
@@ -36,10 +34,8 @@ public class DbManager {
 	 */
 	public void dbConnect() throws WireMockCsvException {
 		try {
-			WireMockConfiguration.wireMockConfig().notifier().info("Connecting to DB: " + this.csvPath);
 			Class.forName("org.hsqldb.jdbcDriver").newInstance();
 			this.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + this.csvPath, "CSV", "");
-			WireMockConfiguration.wireMockConfig().notifier().info("Connected to DB");
 		} catch (final InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
 			throw new WireMockCsvException("Erreur lors de la création de la base de données CSV : " + e.getMessage(), e);
 		}
