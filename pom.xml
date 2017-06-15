@@ -83,6 +83,18 @@
 				<version>2.5.3</version>
 				<executions>
 					<execution>
+						<id>with-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptor>src/main/assembly/with-dependencies.xml</descriptor>
+							<finalName>${project.artifactId}-${project.version}-with-dependencies</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+					<execution>
 						<id>standalone</id>
 						<phase>package</phase>
 						<goals>

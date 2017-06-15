@@ -13,7 +13,10 @@ Maven 3 and a JDK 8 are necessary to build the archive. Then, the following comm
 
     mvn clean install
 
-The "target" directory will then contain a standalone jar file with all necessary binaries.
+The "target" directory will then contain several binaries:
+* a standalone jar file with all necessary binaries (WireMockCsv-VERSION-standalone.jar).
+* a semi-standalone jar file with all necessary binaries except wiremock (WireMockCsv-VERSION-with-dependencies.jar).
+* a jar with only the extension's code (WireMockCsv-VERSION.jar).
 
 ## Launch in a standalone mode with console:
 
