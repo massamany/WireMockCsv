@@ -23,6 +23,10 @@ Le répertoire "target" contiendra alors un jar standalone contenant l'intégral
 
 Utiliser la configuration de lancement fournie, éventuellement en changeant le répertoire root-dir.
 
+## Changer le chemin de la base CSV:
+
+Si le lanceur fourni permettant à l'extension de récupérer le chemin racine des mocks ne peut pas être utilisé ou si vous voulez le changer, la propriété système suivante peut être utilisée `csv-root-dir`.
+
 ## Utilisation:
 
 ### Créer sa BDD

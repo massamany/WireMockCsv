@@ -38,7 +38,7 @@ public class WireMockCsv extends ResponseTransformer {
 		try {
 			this.jsonConverter = new JsonConverter();
 
-			this.manager = new DbManager(WireMockCsvServerRunner.filesRoot() + File.separatorChar + "csv" + File.separatorChar + "Database");
+			this.manager = new DbManager(this.getCsvDbPath());
 			this.manager.dbConnect();
 
 			this.config = new ConfigHandler(this.manager, this.jsonConverter);
@@ -183,5 +183,10 @@ public class WireMockCsv extends ResponseTransformer {
 		if (parameters.containsKey(key)) {
 			queries.put(key, parameters.get(key));
 		}
+	}
+
+	private String getCsvDbPath() {
+		final String filesRoot = System.getProperty("csv-root-dir", WireMockCsvServerRunner.filesRoot() == null ? "." : WireMockCsvServerRunner.filesRoot());
+		return filesRoot + File.separatorChar + "csv" + File.separatorChar + "Database";
 	}
 }

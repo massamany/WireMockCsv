@@ -23,6 +23,10 @@ The "target" directory will then contain a standalone jar file with all necessar
 
 Use the provided launch configuration, eventually changing the root directory.
 
+## Change the CSV Database path:
+
+If you can't use the provided launcher which allows the extension to retrieve the files root, or if you have to change it, you can use the system property `csv-root-dir`.
+
 ## Usage:
 
 ### Create your DB
