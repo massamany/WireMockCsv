@@ -1,0 +1,46 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/clientAvecMessages",
+    "queryParameters" : {
+      "clientCode" : {
+        "matches" : "..*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":["SELECT c.*, (select count(*) FROM facture f where f.\"clientCode\" = c.\"code\") as \"nombreDeFactures\", ",
+      "(select count(*) FROM client_adresse f where f.\"clientCode\" = c.\"code\") as \"nombreDAdresses\" ",
+      "FROM client c WHERE c.\"code\" = '${clientCode}'"],
+      "resultType":"object",
+      "mask": ["nombreDeFactures", "nombreDAdresses"],
+      "subqueries": {
+        "messages__infos": [{
+          "conditionQuery": "values ('${nombreDeFactures}')",
+          "conditions": {
+            "0": {
+              "query":"values ('Aucune facture')"
+            },
+            "default": {
+              "query":"values ('${nombreDeFactures} factures')"
+            }
+          },
+          "resultType":"value"
+        }],
+        "messages__warnings": [{
+          "conditionQuery": "values ('${nombreDAdresses}')",
+          "conditions": {
+            "0": {
+              "query":"values ('Aucune adresse')"
+            }
+          },
+          "resultType":"value"
+        }]
+      }
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

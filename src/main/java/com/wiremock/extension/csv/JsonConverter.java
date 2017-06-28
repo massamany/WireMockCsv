@@ -138,7 +138,22 @@ public class JsonConverter {
 				if (obj.containsKey(subResult.getKey())) {
 					throw new WireMockCsvException("Doublon sur le champ '" + subResult.getKey() + "' lors de la convertion en JSON.");
 				}
-				obj.put(subResult.getKey(), this.convert(subResult.getValue()));
+				this.addFieldToObject(obj, subResult.getKey().split("__"), this.convert(subResult.getValue()));
+			}
+		}
+		if (line.getSubResultsLists() != null) {
+			for (final Map.Entry<String, List<QueryResults>> subResult: line.getSubResultsLists().entrySet()) {
+				if (obj.containsKey(subResult.getKey())) {
+					throw new WireMockCsvException("Doublon sur le champ '" + subResult.getKey() + "' lors de la convertion en JSON.");
+				}
+				final ArrayList<Object> convSubResult = new ArrayList<>();
+				for (final QueryResults qr: subResult.getValue()) {
+					final Object convertedQr = this.convert(qr);
+					if (convertedQr != null) {
+						convSubResult.add(convertedQr);
+					}
+				}
+				this.addFieldToObject(obj, subResult.getKey().split("__"), convSubResult);
 			}
 		}
 		return obj;

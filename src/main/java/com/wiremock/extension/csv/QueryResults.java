@@ -110,6 +110,7 @@ public class QueryResults {
 	public class QueryResult {
 		private final Object[] result;
 		private Map<String, QueryResults> subResults;
+		private Map<String, List<QueryResults>> subResultsLists;
 
 		public QueryResult(final Object[] line) {
 			this.result = line;
@@ -123,6 +124,14 @@ public class QueryResults {
 		}
 		public void setSubResults(final Map<String, QueryResults> subResults) {
 			this.subResults = subResults;
+		}
+
+		public Map<String, List<QueryResults>> getSubResultsLists() {
+			return this.subResultsLists;
+		}
+
+		public void setSubResultsLists(final Map<String, List<QueryResults>> subResultsLists) {
+			this.subResultsLists = subResultsLists;
 		}
 
 		public String[] getColumns() {

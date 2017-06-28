@@ -1,6 +1,8 @@
 ﻿﻿
 # Extension Wiremock CSV
 
+![Build status](https://api.travis-ci.org/massamany/WireMockCsv.svg "Build status") 
+
 *Lire cette documentation dans une autre langue : [English](README.md).*
 
 ## Introduction
@@ -74,12 +76,21 @@ Un requêtage est constitué de plusieurs composants :
     * Requête principale : Il sera remplacé par la valeur paramètre custom du même nom ou à défaut par la valeur du paramètre HTTP du même nom
     * Sous requête : Il sera remplacé par la valeur de la colonne du même nom ou à défaut par la valeur paramètre custom du même nom ou à défaut par la valeur du paramètre HTTP du même nom
     * Un paramètre n'ayant pas de valeur de remplacement sera remplacé par une chaîne vide
+* "conditionQuery" : Une requête SQL ne devant retourner qu'une valeur (une ligne et une colonne). Potentiellement paramétrée avec soit les paramètres HTTP (pour la requête principale), soit les résultats de la requête mère (pour les sous-requêtes).
+* "conditions" : Map de valeurs possibles issue de "conditionQuery", pour lesquelles un requêtage personnalisé peut être réalisé. Ceci permet de personnaliser le résultat et éventuellement sa structure, en fonction des données. La valeur prédéfinie suivantes sont gérées :
+    * "undefined" si pas de résultat (aucune ligne).
+    * "null" si la valeur est nulle (une ligne avec champ null).
+    * "default" pour une valeur non nulle non présente dans les conditions.
 * "mask" : Une liste des noms de colonnes résultats de la requête principale qui n'apparaîtront pas dans le JSon final, ceci permettant de récupérer des valeurs pour un paramètre de sous-requête. Autre avantage, utiliser le "select *" et supprimer une colonne du résultat afin d'obtenir requête moins verbeuse.
 * "aliases" : Alternative pour paramétrer les noms de sous-objets et de champs, évitant d'utiliser les alias de nom colonne.
-* "subqueries" : Il s'agit en fait simplement d'une Liste de Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "noLines" et "customParameters"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
+* "subqueries" : Il s'agit en fait simplement d'une Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "noLines" et "customParameters"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
+    * Le nom du champ JSON peut être formaté avec des "__" pour introduire plusieurs niveaux dans la hiérarchie d'objets.
+    * Le Requêtage peut également être un tableau de Requêtage, auquel cas le champ JSON contiendra un tableaux de tous les résultats.
 * "resultType" : Si le résultat attendu est une valeur ("value"), un objet unique ("object"), un tableau ("array") ou une liste ("list"). Liste  par défaut. Si "object" et plusieurs objet renvoyés par la requête, alors le premier est pris en compte, les autres sont ignorés. Si "value" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées. Si "array" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées.
 * "noLines" : Si aucune ligne n'est retournée par la requête SQL, le statut, le message de statut HTTP et la réponse peuvent être surchargés via ce paramètre.
 * "customParameters": Permet de créer de nouveaux paramètres, éventuellement dérivés des existantss. Voir chapitre dédié.
+
+"query" et "conditionQuery" ne peuvent pas être utilisés ensemble. Si "conditionQuery" est utilisé, la présence de "conditions" est obligatoire.
 
 Les noms des colonnes SQL ou des alias donnés lors du requêtage donne directement le nom du champ en JSON.
 Exemple : `select "monChamp" from ma_table`
@@ -338,6 +349,14 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
     * http://localhost:8181/rechercherFacturesSelonListeArticles1?articleCodes=ART01;ART03
     * http://localhost:8181/rechercherFacturesSelonListeArticles2?articleCodes=ART01;ART03
     * http://localhost:8181/rechercherFacturesSelonListeArticles3?articleCode=ART01&articleCode=ART03
+
+* Récupérer un client avec un tableau de codes de factures ou un message si aucune facture (depuis 1.1.0)
+    * http://localhost:8181/clientAvecListeCodeFactureOuMessage?clientCode=CLI01
+    * http://localhost:8181/clientAvecListeCodeFactureOuMessage?clientCode=CLI04
+
+* Récupérer un client avec un objet contenant des messages informatifs et warnings (depuis 1.1.0)
+    * http://localhost:8181/clientAvecMessages?clientCode=CLI01
+    * http://localhost:8181/clientAvecMessages?clientCode=CLI04
 
 * Récupérer un client avec sous-listes d'adresses et de factures, elle-même avec sous-liste de lignes, elle-même avec sous-objet article. Avec ou sans filtre. Deux syntaxes différentes présentées
     * http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01

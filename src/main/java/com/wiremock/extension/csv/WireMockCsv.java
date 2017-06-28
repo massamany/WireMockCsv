@@ -110,30 +110,52 @@ public class WireMockCsv extends ResponseTransformer {
 	 */
 	private QueryResults executeQueries(final RequestConfigHandler requestConfig, final Map<String, Object> queries)
 			throws WireMockCsvException {
+		if (queries.get("query") != null && queries.get("conditionQuery") != null) {
+			throw new WireMockCsvException("'query' and 'conditionQuery' can't be both used.");
+		}
 		final QueryResults result;
-		if (queries.get("query") != null) {
+		if (queries.get("conditionQuery") != null) {
+			String query = this.getQuery(queries.get("conditionQuery"));
+			query = WireMockCsvUtils.replaceQueryVariables(query, requestConfig);
 			@SuppressWarnings("unchecked")
-			final Set<String> mask = new HashSet<>(queries.get("mask") == null ? Collections.emptyList() : (List<String>) queries.get("mask"));
+			final Map<String, Map<String, Object>> conditions = (Map<String, Map<String, Object>>) queries.get("conditions");
+			final QueryResults conditionResult = this.manager.select(query, null);
+			final String conditionValue = conditionResult.getLines().isEmpty() ? "undefined"
+					: conditionResult.getLines().get(0).getResult()[0] == null ? "null" : conditionResult.getLines().get(0).getResult()[0].toString();
+			final Map<String, Object> condition = conditions.getOrDefault(conditionValue, conditions.get("default"));
+			result = condition == null ? this.emptyQueryResult() : this.executeQueries(requestConfig, condition);
+		} else if (queries.get("query") != null) {
 			String query = this.getQuery(queries.get("query"));
+			query = WireMockCsvUtils.replaceQueryVariables(query, requestConfig);
 			@SuppressWarnings("unchecked")
 			final Map<String, Map<String, Object>> aliases = (Map<String, Map<String, Object>>) queries.get("aliases");
-			query = WireMockCsvUtils.replaceQueryVariables(query, requestConfig);
 			result = this.manager.select(query, aliases);
-			result.setMaskedColumns(mask);
 		} else {
 			//Pas de query principale : on simule un resultat de 1 ligne sans colonne, afin de permettre l'exécution de subqueries
 			//d'extraction en masse.
-			final ArrayList<QueryResult> lines = new ArrayList<>();
-			result = new QueryResults(new String[] {}, lines);
-			lines.add(result.new QueryResult(new Object[] {}));
+			result = this.emptyQueryResult();
+		}
+		if (result.getMaskedColumns() == null) {
+			@SuppressWarnings("unchecked")
+			final Set<String> mask = new HashSet<>(queries.get("mask") == null ? Collections.emptyList() : (List<String>) queries.get("mask"));
+			result.setMaskedColumns(mask);
 		}
 
-		result.setResultType((String) queries.get("resultType"));
+		if (result.getResultType() == null) {
+			result.setResultType((String) queries.get("resultType"));
+		}
 
 		@SuppressWarnings("unchecked")
-		final Map<String, Map<String, Object>> subQueries = (Map<String, Map<String, Object>>) queries.get("subqueries");
+		final Map<String, Object> subQueries = (Map<String, Object>) queries.get("subqueries");
 		this.fillSubQueryResults(requestConfig, result, subQueries);
 
+		return result;
+	}
+
+	private QueryResults emptyQueryResult() {
+		final ArrayList<QueryResult> lines = new ArrayList<>();
+		final QueryResults result = new QueryResults(new String[] {}, lines);
+		lines.add(result.new QueryResult(new Object[] {}));
 		return result;
 	}
 
@@ -154,14 +176,30 @@ public class WireMockCsv extends ResponseTransformer {
 	/**
 	 * Execute et parse toutes les sub queries puis injecte les résultat dans le résultat parent.
 	 */
-	private void fillSubQueryResults(final RequestConfigHandler requestConfig, final QueryResults qr, final Map<String, Map<String, Object>> subQueries)
+	private void fillSubQueryResults(final RequestConfigHandler requestConfig, final QueryResults qr, final Map<String, Object> subQueries)
 			throws WireMockCsvException {
 		if (subQueries != null && !subQueries.isEmpty()) {
 			for (final QueryResult line: qr.getLines()) {
-				line.setSubResults(new HashMap<>());
-				for (final Map.Entry<String, Map<String, Object>> subQuery: subQueries.entrySet()) {
-					final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line), subQuery.getValue());
-					line.getSubResults().put(subQuery.getKey(), subResult);
+				for (final Map.Entry<String, Object> subQueryEntry: subQueries.entrySet()) {
+					if (subQueryEntry.getValue() instanceof Map) {
+						if (line.getSubResults() == null) {
+							line.setSubResults(new HashMap<>());
+						}
+						final Map<String, Object> subQuery = (Map<String, Object>) subQueryEntry.getValue();
+						final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line), subQuery);
+						line.getSubResults().put(subQueryEntry.getKey(), subResult);
+					} else if (subQueryEntry.getValue() instanceof List) {
+						if (line.getSubResultsLists() == null) {
+							line.setSubResultsLists(new HashMap<>());
+						}
+						final List<Map<String, Object>> subQueryList = (List<Map<String, Object>>) subQueryEntry.getValue();
+						final List<QueryResults> subQueryResults = new ArrayList<>(subQueryList.size());
+						for (final Map<String, Object> subQuery: subQueryList) {
+							final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line), subQuery);
+							subQueryResults.add(subResult);
+						}
+						line.getSubResultsLists().put(subQueryEntry.getKey(), subQueryResults);
+					}
 				}
 			}
 		}
@@ -170,6 +208,8 @@ public class WireMockCsv extends ResponseTransformer {
 	private Map<String, Object> getQueriesConfig(final Parameters parameters) {
 		final Map<String, Object> queries = new HashMap<>(this.config.getGlobalConfig());
 		this.putConfigParameter(parameters, queries, "structure");
+		this.putConfigParameter(parameters, queries, "conditionQuery");
+		this.putConfigParameter(parameters, queries, "conditions");
 		this.putConfigParameter(parameters, queries, "query");
 		this.putConfigParameter(parameters, queries, "subqueries");
 		this.putConfigParameter(parameters, queries, "mask");
