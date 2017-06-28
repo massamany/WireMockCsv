@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -94,6 +95,12 @@ public class JsonConverter {
 				obj = Collections.emptyMap();
 			} else {
 				obj = this.convertToMap(qr.getLines().get(0));
+			}
+		} else if ("array".equals(qr.getResultType())) {
+			if (qr.getLines().isEmpty()) {
+				obj = Collections.emptyList();
+			} else {
+				obj = qr.getLines().stream().map(line -> line.getResult()[0]).collect(Collectors.toList());
 			}
 		} else {
 			obj = this.convertToMapList(qr);

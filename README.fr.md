@@ -77,7 +77,7 @@ Un requêtage est constitué de plusieurs composants :
 * "mask" : Une liste des noms de colonnes résultats de la requête principale qui n'apparaîtront pas dans le JSon final, ceci permettant de récupérer des valeurs pour un paramètre de sous-requête. Autre avantage, utiliser le "select *" et supprimer une colonne du résultat afin d'obtenir requête moins verbeuse.
 * "aliases" : Alternative pour paramétrer les noms de sous-objets et de champs, évitant d'utiliser les alias de nom colonne.
 * "subqueries" : Il s'agit en fait simplement d'une Liste de Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "noLines" et "customParameters"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
-* "resultType" : Si le résultat attendu est une valeur ("value"), un objet unique ("object") ou une liste ("list"). Liste  par défaut. Si "object" et plusieurs objet renvoyés par la requête, alors le premier est pris en compte, les autres sont ignorés. Si "value" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées.
+* "resultType" : Si le résultat attendu est une valeur ("value"), un objet unique ("object"), un tableau ("array") ou une liste ("list"). Liste  par défaut. Si "object" et plusieurs objet renvoyés par la requête, alors le premier est pris en compte, les autres sont ignorés. Si "value" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées. Si "array" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées.
 * "noLines" : Si aucune ligne n'est retournée par la requête SQL, le statut, le message de statut HTTP et la réponse peuvent être surchargés via ce paramètre.
 * "customParameters": Permet de créer de nouveaux paramètres, éventuellement dérivés des existantss. Voir chapitre dédié.
 
@@ -208,7 +208,7 @@ Les opérations suivantes sont disponibles :
     * "sourceParam": Le nom du paramètre contenant la valeur sur laquelle appliquer le remplacement.
     * "regexp": L'expression régulière à utiliser pour identifier les occurences.
     * "replacement": La nouvelle valeur. Supporte les groupes de regexp ($0, $1, ...)
-* "concatenate": concatène une ou lpusieurs Strings avec un préfixe, un séparateur et un suffixe. Paramètres :
+* "concatenate": concatène une ou plusieurs Strings avec un préfixe, un séparateur et un suffixe. Paramètres :
     * "action": "concatenate",
     * "sourceParam": Le nom du paramètre contenant les valeurs à concaténer.
     * "prefix"
