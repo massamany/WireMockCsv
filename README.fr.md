@@ -83,12 +83,12 @@ Un requêtage est constitué de plusieurs composants :
     * "default" pour une valeur non nulle non présente dans les conditions.
 * "mask" : Une liste des noms de colonnes résultats de la requête principale qui n'apparaîtront pas dans le JSon final, ceci permettant de récupérer des valeurs pour un paramètre de sous-requête. Autre avantage, utiliser le "select *" et supprimer une colonne du résultat afin d'obtenir requête moins verbeuse.
 * "aliases" : Alternative pour paramétrer les noms de sous-objets et de champs, évitant d'utiliser les alias de nom colonne.
-* "subqueries" : Il s'agit en fait simplement d'une Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "noLines" et "customParameters"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
+* "subqueries" : Il s'agit en fait simplement d'une Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "noLines"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
     * Le nom du champ JSON peut être formaté avec des "__" pour introduire plusieurs niveaux dans la hiérarchie d'objets.
     * Le Requêtage peut également être un tableau de Requêtage, auquel cas le champ JSON contiendra un tableaux de tous les résultats.
 * "resultType" : Si le résultat attendu est une valeur ("value"), un objet unique ("object"), un tableau ("array") ou une liste ("list"). Liste  par défaut. Si "object" et plusieurs objet renvoyés par la requête, alors le premier est pris en compte, les autres sont ignorés. Si "value" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées. Si "array" et plusieurs colonnes, alors la première est prise en compte les autres sont ignorées.
 * "noLines" : Si aucune ligne n'est retournée par la requête SQL, le statut, le message de statut HTTP et la réponse peuvent être surchargés via ce paramètre.
-* "customParameters": Permet de créer de nouveaux paramètres, éventuellement dérivés des existantss. Voir chapitre dédié.
+* "customParameters": Permet de créer de nouveaux paramètres, éventuellement dérivés des existants. Voir chapitre dédié.
 
 "query" et "conditionQuery" ne peuvent pas être utilisés ensemble. Si "conditionQuery" est utilisé, la présence de "conditions" est obligatoire.
 
@@ -191,6 +191,8 @@ Exemple de fichier de configuration :
 Dans certains cas, les paramètres disponibles ne peuvent pas être directement intégrés dans les requêtes SQL. Par exemple, un tableau de valeurs ou une String contenant des valeurs délimitées et devant être intégrées dans une clause SQL IN.
 
 Pour faire cette opération, il faut utiliser les paramètres custom, permettant de transformer un paramètre existant pour en obtenir un nouveau qu'il sera possible d'utiliser. Plusieurs opérations peuvent être chainées pour obtenir la transformation désirée.
+
+Les paramètres custom peuvent être utilisés au niveau de la requête racine, ou dans des subqueries, auquel cas leur portée sera limitée à cette subquery et ses propres subqueries.
 
 Syntaxe :
 
@@ -371,4 +373,5 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
     * http://localhost:8181/testCustomParamFromQuery1
 	* http://localhost:8181/testCustomParamFromQuery2
 	* http://localhost:8181/testCustomParamFromQuery3
+	* http://localhost:8181/testCustomParamInSubQuery (paramètres custom dans sub queries, depuis 1.1.0)
     

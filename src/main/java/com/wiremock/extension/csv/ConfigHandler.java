@@ -52,34 +52,20 @@ public class ConfigHandler {
 	public interface RequestConfigHandler {
 		Request getRequest();
 		Parameters getTransformerParameters();
-		RequestConfigHandler addQueryResult(QueryResult qr);
+		RequestConfigHandler addQueryResult(QueryResult qr, Map<String, Map<String, Object>> customParametersConfig)
+				throws WireMockCsvException;
 		QueryResult getNearestQueryResult();
 		Object getParamValue(String paramName);
 		List<?> getParamValues(String paramName);
 	}
 
-	/**
-	 * Classe permettant de stocker le premier niveau de configuration.
-	 */
-	private class RootConfigHandler implements RequestConfigHandler {
-		private final Request request;
-		private final Map<String, ListOrSingle<String>> requestParams;
-		private final Parameters transformerParameters;
+	private abstract class AbstractConfigHandler implements RequestConfigHandler {
 		private Map<String, List<?>> customParameters;
 
-		public RootConfigHandler(final Request request, final Parameters transformerParameters) throws WireMockCsvException {
-			this.request = request;
-			this.requestParams = RequestTemplateModel.from(request).getQuery();
-			this.transformerParameters = transformerParameters;
-			this.initCustomParameters();
-		}
 
-		private void initCustomParameters() throws WireMockCsvException {
-			if (this.transformerParameters.containsKey("customParameters")) {
+		protected void initCustomParameters(final Map<String, Map<String, Object>> customParametersConfig) throws WireMockCsvException {
+			if (customParametersConfig != null) {
 				this.customParameters = new HashMap<>();
-				@SuppressWarnings("unchecked")
-				final Map<String, Map<String, Object>> customParametersConfig =
-				(Map<String, Map<String, Object>>) this.transformerParameters.get("customParameters");
 				for (final Map.Entry<String, Map<String, Object>> e: customParametersConfig.entrySet()) {
 					this.initCustomParameter(e);
 				}
@@ -133,14 +119,14 @@ public class ConfigHandler {
 							"Can't handle queries with multiple columns and lines in fromQuery custom parameter");
 				}
 				if (result.getLines().size() > 1) {
-					// Liste de toutes les lignes
+					// Liste de toutes les lignes, première colonne uniquement.
 					this.customParameters.put(e.getKey(),
 							result.getLines().stream().map(qr -> qr.getResult()[0]).collect(Collectors.toList()));
 				} else {
 					if (result.getLines().isEmpty()) {
 						// Pas de résultat
 						this.customParameters.remove(e.getKey());
-					} else if (result.getColumns().length > 1) {
+					} else {
 						// Liste de toutes les colonnes
 						this.customParameters.put(e.getKey(), Arrays.asList(result.getLines().get(0).getResult()));
 					}
@@ -159,6 +145,29 @@ public class ConfigHandler {
 			}
 		}
 
+		protected Map<String, List<?>> getCustomParameters() {
+			return this.customParameters;
+		}
+	}
+
+	/**
+	 * Classe permettant de stocker le premier niveau de configuration.
+	 */
+	private class RootConfigHandler extends AbstractConfigHandler {
+		private final Request request;
+		private final Map<String, ListOrSingle<String>> requestParams;
+		private final Parameters transformerParameters;
+
+		public RootConfigHandler(final Request request, final Parameters transformerParameters) throws WireMockCsvException {
+			this.request = request;
+			this.requestParams = RequestTemplateModel.from(request).getQuery();
+			this.transformerParameters = transformerParameters;
+			@SuppressWarnings("unchecked")
+			final Map<String, Map<String, Object>> customParametersConfig =
+			(Map<String, Map<String, Object>>) this.transformerParameters.get("customParameters");
+			this.initCustomParameters(customParametersConfig);
+		}
+
 		@Override
 		public Request getRequest() {
 			return this.request;
@@ -170,8 +179,9 @@ public class ConfigHandler {
 		}
 
 		@Override
-		public RequestConfigHandler addQueryResult(final QueryResult qr) {
-			return new QueryResultConfigHandler(this, qr);
+		public RequestConfigHandler addQueryResult(final QueryResult qr, final Map<String, Map<String, Object>> customParametersConfig)
+				throws WireMockCsvException {
+			return new QueryResultConfigHandler(this, qr, customParametersConfig);
 		}
 
 		@Override
@@ -182,8 +192,8 @@ public class ConfigHandler {
 		@Override
 		public Object getParamValue(final String paramName) {
 			List<?> value;
-			if (this.customParameters != null && this.customParameters.containsKey(paramName)) {
-				value = this.customParameters.get(paramName);
+			if (this.getCustomParameters() != null && this.getCustomParameters().containsKey(paramName)) {
+				value = this.getCustomParameters().get(paramName);
 			} else {
 				value = this.requestParams.get(paramName);
 			}
@@ -193,8 +203,8 @@ public class ConfigHandler {
 		@Override
 		public List<?> getParamValues(final String paramName) {
 			List<?> value;
-			if (this.customParameters != null && this.customParameters.containsKey(paramName)) {
-				value = this.customParameters.get(paramName);
+			if (this.getCustomParameters() != null && this.getCustomParameters().containsKey(paramName)) {
+				value = this.getCustomParameters().get(paramName);
 			} else {
 				value = this.requestParams.get(paramName);
 			}
@@ -205,14 +215,16 @@ public class ConfigHandler {
 	/**
 	 * Classe permettant de stocker les niveaux suivant de configuration.
 	 */
-	private class QueryResultConfigHandler implements RequestConfigHandler {
+	private class QueryResultConfigHandler extends AbstractConfigHandler {
 		private final RequestConfigHandler parent;
 		private final QueryResult queryResult;
 
-		public QueryResultConfigHandler(final RequestConfigHandler parent, final QueryResult queryResult) {
+		public QueryResultConfigHandler(final RequestConfigHandler parent, final QueryResult queryResult,
+				final Map<String, Map<String, Object>> customParametersConfig) throws WireMockCsvException {
 			super();
 			this.parent = parent;
 			this.queryResult = queryResult;
+			this.initCustomParameters(customParametersConfig);
 		}
 
 		@Override
@@ -226,8 +238,9 @@ public class ConfigHandler {
 		}
 
 		@Override
-		public RequestConfigHandler addQueryResult(final QueryResult qr) {
-			return new QueryResultConfigHandler(this, qr);
+		public RequestConfigHandler addQueryResult(final QueryResult qr, final Map<String, Map<String, Object>> customParametersConfig)
+				throws WireMockCsvException {
+			return new QueryResultConfigHandler(this, qr, customParametersConfig);
 		}
 
 		@Override
@@ -237,7 +250,10 @@ public class ConfigHandler {
 
 		@Override
 		public Object getParamValue(final String paramName) {
-			if (this.queryResult != null) {
+			if (this.getCustomParameters() != null && this.getCustomParameters().containsKey(paramName)) {
+				List<?> paramValues = this.getCustomParameters().get(paramName);
+				return paramValues.isEmpty() ? null : paramValues.get(0);
+			} else if (this.queryResult != null) {
 				for (int idx = 0 ; idx < this.queryResult.getColumns().length ; ++idx) {
 					if (this.queryResult.getColumns()[idx].equals(paramName)) {
 						return this.queryResult.getResult()[idx];
@@ -249,7 +265,9 @@ public class ConfigHandler {
 
 		@Override
 		public List<?> getParamValues(final String paramName) {
-			if (this.queryResult != null) {
+			if (this.getCustomParameters() != null && this.getCustomParameters().containsKey(paramName)) {
+				return this.getCustomParameters().get(paramName);
+			} else if (this.queryResult != null) {
 				for (int idx = 0 ; idx < this.queryResult.getColumns().length ; ++idx) {
 					if (this.queryResult.getColumns()[idx].equals(paramName)) {
 						final List<Object> res = new ArrayList<>(1);

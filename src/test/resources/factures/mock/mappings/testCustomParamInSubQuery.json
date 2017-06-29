@@ -1,0 +1,38 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/testCustomParamInSubQuery",
+    "queryParameters" : {
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":"SELECT c.* FROM client c",
+      "subqueries": {
+        "donneesClient": {
+          "customParameters": {
+            "array_client_data": {
+              "action": "fromQuery",
+              "query": "select \"civilite\", \"prenom\", \"nom\" from client where \"code\" = '${code}'"
+            },
+            "escaped_array_client_data": {
+              "action": "escapeSql",
+              "sourceParam": "array_client_data"
+            },
+            "string_client_data": {
+              "action": "concatenate",
+              "sourceParam": "escaped_array_client_data",
+              "prefix": "Client''s data: ",
+              "separator": " "
+            }
+          },
+          "query": "values('${string_client_data}')",
+          "resultType": "value"
+        }
+      }
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

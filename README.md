@@ -83,7 +83,7 @@ A request is composed by several components:
     * "default" for non null values but not specified in conditions.
 * "mask": A list of column names of the query results which will not appear in the generated JSON. This allows retrieving values to use as parameters for sub-requests. Other trick, use "select*" and mask one column instead of listing all needed columns, the request will be sorter.
 * "aliases": Alternative to parameter sub-objects and fields names, instead of using columns names.
-* "subqueries": It's simply a Map of [String ; Request]. The key is the JSON field name of the future sub-list or sub-object to retrieve and the request is again all of the components "query", "subqueries", etc ... (except "noLines" and "customParameters"). It's hence possible to interlock an infinite number of sub-requests.
+* "subqueries": It's simply a Map of [String ; Request]. The key is the JSON field name of the future sub-list or sub-object to retrieve and the request is again all of the components "query", "subqueries", etc ... (except "noLines"). It's hence possible to interlock an infinite number of sub-requests.
     * The JSON field name can be formated with "__" separators to introduced several levels of Objects.
     * The Request can also be an array of Requests, in which case the JSON field will contain an array of all the results. 
 * "resultType": Tells if the expected result is a value ("value"), a unique object ("object"), an array ("array") or a list ("list"). List by default. If "object" and several objects returned by the query, then only the first one is taken into account, the others are ignored. If "value" and several columns, then only the first one is taken into account, the others are ignored. If "array" and several columns, then only the first one is taken into account, the others are ignored.
@@ -190,6 +190,8 @@ Configuration file example:
 In some cases, the available parameters can't be directly integrated in the SQL queries. For example, if you have an array of values or a String containing several separated values to integrated in a SQL IN clause.
 
 To achieve this, you may have to use the custom parameters features, which will allow you transforming the original parameter to obtain another one you will be able to use. Several operations can be chained to achieve the desired transformation.
+
+Custom parameters can be used at the root query level, or in subqueries, in which case their visibility will be limited to this subquery and its own subqueries.
 
 Syntax:
 
@@ -371,3 +373,4 @@ In addition, this example uses a global configuration file allowing to change th
     * http://localhost:8181/testCustomParamFromQuery1
 	* http://localhost:8181/testCustomParamFromQuery2
 	* http://localhost:8181/testCustomParamFromQuery3
+	* http://localhost:8181/testCustomParamInSubQuery (custom parameters in sub queries, since 1.1.0)

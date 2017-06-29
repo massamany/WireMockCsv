@@ -185,17 +185,25 @@ public class WireMockCsv extends ResponseTransformer {
 						if (line.getSubResults() == null) {
 							line.setSubResults(new HashMap<>());
 						}
+						@SuppressWarnings("unchecked")
 						final Map<String, Object> subQuery = (Map<String, Object>) subQueryEntry.getValue();
-						final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line), subQuery);
+						@SuppressWarnings("unchecked")
+						final Map<String, Map<String, Object>> customParametersConfig =
+						(Map<String, Map<String, Object>>) subQuery.get("customParameters");
+						final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line, customParametersConfig), subQuery);
 						line.getSubResults().put(subQueryEntry.getKey(), subResult);
 					} else if (subQueryEntry.getValue() instanceof List) {
 						if (line.getSubResultsLists() == null) {
 							line.setSubResultsLists(new HashMap<>());
 						}
+						@SuppressWarnings("unchecked")
 						final List<Map<String, Object>> subQueryList = (List<Map<String, Object>>) subQueryEntry.getValue();
 						final List<QueryResults> subQueryResults = new ArrayList<>(subQueryList.size());
 						for (final Map<String, Object> subQuery: subQueryList) {
-							final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line), subQuery);
+							@SuppressWarnings("unchecked")
+							final Map<String, Map<String, Object>> customParametersConfig =
+							(Map<String, Map<String, Object>>) subQuery.get("customParameters");
+							final QueryResults subResult = this.executeQueries(requestConfig.addQueryResult(line, customParametersConfig), subQuery);
 							subQueryResults.add(subResult);
 						}
 						line.getSubResultsLists().put(subQueryEntry.getKey(), subQueryResults);
