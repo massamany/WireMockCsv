@@ -90,7 +90,7 @@ A request is composed by several components:
 * "noLines": If no lines are returned by the SQL query the HTTP status, status message and response can be overridden with this parameter.
 * "customParameters": Allows creating new parameters, eventually derived from existing ones. See dedicated chapter.
 
-"query" and "conditionQuery" can not be used together. If "conditionQuery" is used, presence of "conditions" is mandatory.
+"query" and "conditionQuery" can not be used together. If "conditionQuery" is used, presence of "conditions" is mandatory. See exemple for tips on creatin complex conditions (>, <, etc).
 
 The SQL columns names or the SQL alias given while querying provide directly the JSON field name.
 Example: `select "myField" from my_table`
@@ -359,6 +359,10 @@ In addition, this example uses a global configuration file allowing to change th
 * Retrieve a client with an objet containing informative or warning messages (since 1.1.0)
     * http://localhost:8181/clientAvecMessages?clientCode=CLI01
     * http://localhost:8181/clientAvecMessages?clientCode=CLI04
+
+* These examples show how to use condition more complex. The concept is simply to use SQL to compute conditions (since 1.1.0)
+    * http://localhost:8181/clientAvecMessage_conditionComplexe1?clientCode=CLI01
+    * http://localhost:8181/clientAvecMessage_conditionComplexe2?clientCode=CLI01
 
 * Retrieve a client with sub-lists of addresses and invoices, each invoice with a sub-list of lines, each line with an article sub-object. With or without filtering. Two different syntax demonstrated
     * http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01

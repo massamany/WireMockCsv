@@ -90,7 +90,7 @@ Un requêtage est constitué de plusieurs composants :
 * "noLines" : Si aucune ligne n'est retournée par la requête SQL, le statut, le message de statut HTTP et la réponse peuvent être surchargés via ce paramètre.
 * "customParameters": Permet de créer de nouveaux paramètres, éventuellement dérivés des existants. Voir chapitre dédié.
 
-"query" et "conditionQuery" ne peuvent pas être utilisés ensemble. Si "conditionQuery" est utilisé, la présence de "conditions" est obligatoire.
+"query" et "conditionQuery" ne peuvent pas être utilisés ensemble. Si "conditionQuery" est utilisé, la présence de "conditions" est obligatoire. Voir les exemple pour l'utilisation de condition complexes (>, <, etc).
 
 Les noms des colonnes SQL ou des alias donnés lors du requêtage donne directement le nom du champ en JSON.
 Exemple : `select "monChamp" from ma_table`
@@ -359,6 +359,10 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 * Récupérer un client avec un objet contenant des messages informatifs et warnings (depuis 1.1.0)
     * http://localhost:8181/clientAvecMessages?clientCode=CLI01
     * http://localhost:8181/clientAvecMessages?clientCode=CLI04
+
+* Ces exemples montrent comment utiliser des conditions plus complexes. Le concept est simplement d'utiliser le SQL pour calculer les conditions (since 1.1.0)
+    * http://localhost:8181/clientAvecMessage_conditionComplexe1?clientCode=CLI01
+    * http://localhost:8181/clientAvecMessage_conditionComplexe2?clientCode=CLI01
 
 * Récupérer un client avec sous-listes d'adresses et de factures, elle-même avec sous-liste de lignes, elle-même avec sous-objet article. Avec ou sans filtre. Deux syntaxes différentes présentées
     * http://localhost:8181/recupererClientAvecAdressesEtFacturesAvecLignesAvecArticle?clientCode=CLI01

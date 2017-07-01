@@ -1,0 +1,40 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/clientAvecMessage_conditionComplexe1",
+    "queryParameters" : {
+      "clientCode" : {
+        "matches" : "..*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "query":["SELECT c.*, (select casewhen(count(*) = 0, 'M', casewhen(count(*) < 10, 'B', 'F'))",
+      "FROM facture f where f.\"clientCode\" = c.\"code\") as \"nombreDeFactures\" ",
+      "FROM client c WHERE c.\"code\" = '${clientCode}'"],
+      "resultType":"object",
+      "mask": ["nombreDeFactures"],
+      "subqueries": {
+        "message": {
+          "conditionQuery": "values ('${nombreDeFactures}')",
+          "conditions": {
+            "M": {
+              "query":"values ('Mauvais Client')"
+            },
+            "B": {
+              "query":"values ('Bon client')"
+            },
+            "F": {
+              "query":"values ('Client fidèle')"
+            }
+          },
+          "resultType":"value"
+        }
+      }
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}
