@@ -32,12 +32,13 @@ public class JsonConverter {
 
 	/**
 	 * Formats json string
+	 *
 	 * @throws WireMockCsvException
 	 */
 	public String formatJson(final String json) throws WireMockCsvException {
 		try {
 			final Object obj = JsonConverter.MAPPER.readValue(json, Object.class);
-			return JsonConverter.INDENT_MAPPER.writeValueAsString(obj);
+			return this.writeValueAsString(obj);
 		} catch (final IOException e) {
 			throw new WireMockCsvException("Erreur lors de la formatage du JSON : " + e.getMessage(), e);
 		}
@@ -48,8 +49,8 @@ public class JsonConverter {
 	 */
 	public String convertObjectToJson(final Object object) throws WireMockCsvException {
 		try {
-			return JsonConverter.MAPPER.writeValueAsString(object);
-		} catch (final JsonProcessingException e) {
+			return this.writeValueAsString(object);
+		} catch (final IOException e) {
 			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
 		}
 	}
@@ -73,8 +74,8 @@ public class JsonConverter {
 	 */
 	public String convertToJson(final QueryResults qr) throws WireMockCsvException {
 		try {
-			return JsonConverter.MAPPER.writeValueAsString(this.convert(qr));
-		} catch (final JsonProcessingException e) {
+			return this.writeValueAsString(this.convert(qr));
+		} catch (final IOException e) {
 			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
 		}
 	}
@@ -125,8 +126,7 @@ public class JsonConverter {
 	/**
 	 * Conversion du {@link QueryResult} en Map
 	 */
-	public Map<String, Object> convertToMap(final QueryResult line)
-			throws WireMockCsvException {
+	public Map<String, Object> convertToMap(final QueryResult line) throws WireMockCsvException {
 		final Map<String, Object> obj = new LinkedHashMap<>();
 		for (int i = 0; i < line.getColumns().length; i++) {
 			if (! line.isMasked(line.getColumns()[i])) {
@@ -136,15 +136,17 @@ public class JsonConverter {
 		if (line.getSubResults() != null) {
 			for (final Map.Entry<String, QueryResults> subResult: line.getSubResults().entrySet()) {
 				if (obj.containsKey(subResult.getKey())) {
-					throw new WireMockCsvException("Doublon sur le champ '" + subResult.getKey() + "' lors de la convertion en JSON.");
+					throw new WireMockCsvException(
+							"Doublon sur le champ '" + subResult.getKey() + "' lors de la convertion en JSON.");
 				}
 				this.addFieldToObject(obj, subResult.getKey().split("__"), this.convert(subResult.getValue()));
 			}
 		}
 		if (line.getSubResultsLists() != null) {
-			for (final Map.Entry<String, List<QueryResults>> subResult: line.getSubResultsLists().entrySet()) {
+			for (final Map.Entry<String, List<QueryResults>> subResult : line.getSubResultsLists().entrySet()) {
 				if (obj.containsKey(subResult.getKey())) {
-					throw new WireMockCsvException("Doublon sur le champ '" + subResult.getKey() + "' lors de la convertion en JSON.");
+					throw new WireMockCsvException(
+							"Doublon sur le champ '" + subResult.getKey() + "' lors de la convertion en JSON.");
 				}
 				final ArrayList<Object> convSubResult = new ArrayList<>();
 				for (final QueryResults qr: subResult.getValue()) {
@@ -159,26 +161,36 @@ public class JsonConverter {
 		return obj;
 	}
 
+	private String writeValueAsString(final Object obj) throws IOException {
+		//final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		//JsonConverter.INDENT_MAPPER.getFactory().createGenerator(out, JsonEncoding.UTF8).writeObject(obj);
+		//return new String(out.toByteArray(), Charset.forName("UTF8"));
+		return JsonConverter.INDENT_MAPPER.writeValueAsString(obj);
+	}
+
 	/**
 	 * Ajoute une valeur dans une Map en fonction de son nom, déjà découpé en fonction des "__".
 	 */
 	@SuppressWarnings("unchecked")
-	private void addFieldToObject(final Map<String, Object> obj, final String[] split, final Object object) throws WireMockCsvException {
+	private void addFieldToObject(final Map<String, Object> obj, final String[] split, final Object object)
+			throws WireMockCsvException {
 		if (split.length == 1) {
 			if (obj.containsKey(split[0])) {
-				throw new WireMockCsvException("Doublon sur le champ '" + split[0] + "' lors de la convertion en JSON.");
+				throw new WireMockCsvException(
+						"Doublon sur le champ '" + split[0] + "' lors de la convertion en JSON.");
 			}
 			if (object != null) {
 				obj.put(split[0], object);
 			}
 		} else {
-			//Sous objet
+			// Sous objet
 			Object sousObj = obj.get(split[0]);
 			if (sousObj == null) {
 				sousObj = new LinkedHashMap<>();
 				obj.put(split[0], sousObj);
 			} else if (! (sousObj instanceof Map)) {
-				throw new WireMockCsvException("Doublon sur le champ '" + split[0] + "' lors de la convertion en JSON.");
+				throw new WireMockCsvException(
+						"Doublon sur le champ '" + split[0] + "' lors de la convertion en JSON.");
 			}
 			final String[] sousSplit = new String[split.length - 1];
 			System.arraycopy(split, 1, sousSplit, 0, split.length - 1);
