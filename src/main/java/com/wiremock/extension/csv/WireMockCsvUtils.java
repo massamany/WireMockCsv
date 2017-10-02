@@ -51,4 +51,12 @@ public final class WireMockCsvUtils {
 
 		return newQuerySQL;
 	}
+
+    /**
+     * Computes files root to use between runner and csv-root-dir system property. Don't use WireMockCsvServerRunner.filesRoot() directly.
+     */
+    public static String getFilesRoot() {
+        return System.getProperty("csv-root-dir",
+                WireMockCsvServerRunner.filesRoot() == null ? "." : WireMockCsvServerRunner.filesRoot());
+    }
 }

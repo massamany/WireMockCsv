@@ -27,6 +27,9 @@ public class WireMockCsvServerRunner {
 		WireMockServerRunner.main(args2);
 	}
 
+	/**
+	 * Internal use only. Prefer {@link WireMockCsvUtils#getFilesRoot()} instead.
+	 */
 	public static String filesRoot() {
 		return WireMockCsvServerRunner.filesRoot;
 	}

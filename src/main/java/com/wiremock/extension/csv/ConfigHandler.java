@@ -29,7 +29,7 @@ public class ConfigHandler {
 	private final DbManager manager;
 
 	public ConfigHandler(final DbManager manager, final JsonConverter jsonConverter) throws WireMockCsvException {
-		final File configFile = new File(WireMockCsvServerRunner.filesRoot() + File.separatorChar + "csv" + File.separatorChar + "WireMockCsv.json.conf");
+		final File configFile = new File(WireMockCsvUtils.getFilesRoot() + File.separatorChar + "csv" + File.separatorChar + "WireMockCsv.json.conf");
 		if (configFile.exists()) {
 			this.globalConfig = Collections.unmodifiableMap(jsonConverter.readJsonToMap(configFile));
 		} else {

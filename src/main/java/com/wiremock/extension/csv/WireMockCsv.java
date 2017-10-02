@@ -233,8 +233,8 @@ public class WireMockCsv extends ResponseTransformer {
 		}
 	}
 
-	private String getCsvDbPath() {
-		final String filesRoot = System.getProperty("csv-root-dir", WireMockCsvServerRunner.filesRoot() == null ? "." : WireMockCsvServerRunner.filesRoot());
-		return filesRoot + File.separatorChar + "csv" + File.separatorChar + "Database";
-	}
+    private String getCsvDbPath() {
+        final String filesRoot = System.getProperty("csv-root-dir", WireMockCsvServerRunner.filesRoot() == null ? "." : WireMockCsvServerRunner.filesRoot());
+        return filesRoot + File.separatorChar + "csv" + File.separatorChar + "Database";
+    }
 }
