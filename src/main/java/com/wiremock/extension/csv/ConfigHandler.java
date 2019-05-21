@@ -4,6 +4,11 @@
 
 package com.wiremock.extension.csv;
 
+import com.github.tomakehurst.wiremock.extension.Parameters;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
+import com.github.tomakehurst.wiremock.http.Request;
+import com.wiremock.extension.csv.QueryResults.QueryResult;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,12 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ListOrSingle;
-import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
-import com.github.tomakehurst.wiremock.http.Request;
-import com.wiremock.extension.csv.QueryResults.QueryResult;
 
 /**
  * Permet de gérer la configuration et les paramètres à l'exécution d'une requête.<br>
@@ -155,16 +154,17 @@ public class ConfigHandler {
 	 */
 	private class RootConfigHandler extends AbstractConfigHandler {
 		private final Request request;
-		private final Map<String, ListOrSingle<String>> requestParams;
+		private final Map<String, ? extends List<String>> requestParams;
 		private final Parameters transformerParameters;
 
 		public RootConfigHandler(final Request request, final Parameters transformerParameters) throws WireMockCsvException {
 			this.request = request;
+			//Let's keep the deprecated ùethod here, so that the extension is still compatible with older Wiremock versions
 			this.requestParams = RequestTemplateModel.from(request).getQuery();
 			this.transformerParameters = transformerParameters;
 			@SuppressWarnings("unchecked")
 			final Map<String, Map<String, Object>> customParametersConfig =
-			(Map<String, Map<String, Object>>) this.transformerParameters.get("customParameters");
+				(Map<String, Map<String, Object>>) this.transformerParameters.get("customParameters");
 			this.initCustomParameters(customParametersConfig);
 		}
 
