@@ -22,7 +22,20 @@ The "target" directory will then contain several binaries:
 
 ## Launch in a standalone mode with console:
 
-    java -jar ".\WiremockCsv-1.0-standalone.jar" -Dfile.encoding=UTF-8 --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+### Simple mode:
+
+This command uses the main class configured in the standalone WireMockCsv jar to launch the app.
+
+    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.1.1-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+
+### Full options mode:
+
+Use this command to change runner, classpath, load other extensions, etc ...
+
+    java -Dfile.encoding=UTF-8 -Dcsv-root-dir="###MY_PROJECT_PATH###\src\test\resources\mock" \
+    -cp "wiremock-standalone-2.9.0.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.1.1-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
+    com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --port 8181 --global-response-templating  --verbose  --root-dir "###MY_ROOT_DIR###" \
+    --extensions com.wiremock.extension.csv.WireMockCsv,tv.teads.wiremock.extension.JsonExtractor,tv.teads.wiremock.extension.Calculator,tv.teads.wiremock.extension.FreeMarkerRenderer,tv.teads.wiremock.extension.Randomizer,com.opentable.extension.BodyTransformer,com.github.masonm.JwtMatcherExtension,com.github.masonm.JwtStubMappingTransformer
 
 ## Launch in a standalone mode with Eclipse:
 
@@ -56,14 +69,20 @@ The standard "jsonBody" is replaced with 2 values:
 
 The structure allows defining expected result structure and where will be integrated the request result. The result place is represented by a parameter named "${WireMockCsv}".
 Default structure is `${WireMockCsv}`, to simply output the JSONified result.
+
+It can be overriden in several ways:
+
+* Global configuration (see Global configuration chapter below)
+* Override it in a specific request (see rechercherFactures or rechercherFactures2 examples) with the following syntax:
+
 Structure change example:
 
     "structure": {
       "main": "${WireMockCsv}"
     },
 
-
 The request allows:
+
 * Listing a table lines, with one or more filters from HTTP parameters.
 * Performing joins, subselects.
 * Obtaining a complex Object hierarchy as a result, with sub-objects and sub-lists.
@@ -76,8 +95,8 @@ A request is composed by several components:
     * Main query: It will be replaced with the value of the value of the custom parameter with the same name, or if not found with the value of the HTTP parameter with the same name.
     * Sub-query: It will be replaced with the value of the column with the same name, or if not found with the value of the value of the custom parameter with the same name, or if not found with the value of the HTTP parameter with the same name.
     * A parameter with no replacement values will be replaced by an empty String.
-* "conditionQuery" : A SQL query meaning to return a value (1 line and column). potentially parameterized with HTTP request parameters or "mother" query results (for sub-queries).
-* "conditions" : Map of possible result values for "conditionQuery", for which a specific request can be performed. This allows personnalizing the result and its structure, depending on data. Following predefined values are handled:
+* "conditionQuery": A SQL query meaning to return a value (1 line and column). potentially parameterized with HTTP request parameters or "mother" query results (for sub-queries).
+* "conditions": Map of possible result values for "conditionQuery", for which a specific request can be performed. This allows personnalizing the result and its structure, depending on data. Following predefined values are handled:
     * "undefined" if no result (no line).
     * "null" if value is null (a line with null field).
     * "default" for non null values but not specified in conditions.
@@ -234,7 +253,7 @@ The following operations are available:
     * "sourceParam": Name of the parameter containing the values to escape.
 
 
-Example :
+Example:
 
     "transformerParameters":{
       "customParameters": {
@@ -378,3 +397,25 @@ In addition, this example uses a global configuration file allowing to change th
 	* http://localhost:8181/testCustomParamFromQuery2
 	* http://localhost:8181/testCustomParamFromQuery3
 	* http://localhost:8181/testCustomParamInSubQuery (custom parameters in sub queries, since 1.1.0)
+
+
+## Changes history:
+
+### 1.1.1
+
+* Code cleaning
+* Better handling of special characters
+* (Fix) configuration retrieval fails if not launched via integrated runner
+
+### 1.1.0
+
+* Custom parameters can now be used in sub queries
+* New requests features
+	* Conditional queries
+	* Possibility to have arrays of sub-queries
+* Handling new "array" type to generate arrays of values from SQL results (first column only)
+* New examples
+
+### 1.0.0
+
+First release
