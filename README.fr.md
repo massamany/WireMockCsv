@@ -22,7 +22,20 @@ Le répertoire "target" contiendra alors :
 
 ## Lancer l'application en standalone via console:
 
-    java -jar ".\WiremockCsv-1.0-standalone.jar" -Dfile.encoding=UTF-8 --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+### Lancement simplifié:
+
+Cette commande permet d'utiliser la main class configurée dans le jar autonome WireMockCsv pour effectuer le lancement.
+
+    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.1.1-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+
+### Lancement toutes options:
+
+Utiliser cette commande pour varier le runner, le classpath, utiliser d'autres extensions, etc ...
+
+    java -Dfile.encoding=UTF-8 -Dcsv-root-dir="###MY_PROJECT_PATH###\src\test\resources\mock" \
+    -cp "wiremock-standalone-2.9.0.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.1.1-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
+    com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --port 8181 --global-response-templating  --verbose  --root-dir "###MY_ROOT_DIR###" \
+    --extensions com.wiremock.extension.csv.WireMockCsv,tv.teads.wiremock.extension.JsonExtractor,tv.teads.wiremock.extension.Calculator,tv.teads.wiremock.extension.FreeMarkerRenderer,tv.teads.wiremock.extension.Randomizer,com.opentable.extension.BodyTransformer,com.github.masonm.JwtMatcherExtension,com.github.masonm.JwtStubMappingTransformer
 
 ## Lancer l'application en standalone via Eclipse:
 
@@ -56,14 +69,21 @@ Le "jsonBody" standard est remplacé par 2 valeurs :
 
 La structure permet de définir la structure attendue du résultat et où y sera intégré le résultat du requêtage. L'emplacement du résultat est représenté par un paramètre nommé "${WireMockCsv}".
 La structure par défaut est `${WireMockCsv}`, pour simplement renvoyer le résultat en format JSON.
+
+Elle peut être surchargée par plusieurs moyen :
+
+* Configuration globale (voir le chapitre Configuration globale)
+
+* Surcharge spécifique pour une requête (voir les exemples  rechercherFactures ou rechercherFactures2) via la syntaxe suivante :
+
 Exemple de changement de structure :
 
     "structure": {
       "donnees": "${WireMockCsv}"
     },
 
-
 Le requêtage permet de :
+
 * Lister les lignes d'une table, éventuellement en filtrant selon les paramètres HTTP.
 * Faire des jointures, des sous-select, etc ... sur les données.
 * Obtenir une grappe d'objets complexes en résultat, avec sous-objets imbriqués et sous-listes.
@@ -378,4 +398,25 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 	* http://localhost:8181/testCustomParamFromQuery2
 	* http://localhost:8181/testCustomParamFromQuery3
 	* http://localhost:8181/testCustomParamInSubQuery (paramètres custom dans sub queries, depuis 1.1.0)
-    
+
+
+## Changes history:
+
+### 1.1.1
+
+* Code cleaning
+* Better handling of special characters
+* (Fix) configuration retrieval fails if not launched via integrated runner
+
+### 1.1.0
+
+* Custom parameters can now be used in sub queries
+* New requests features
+	* Conditional queries
+	* Possibility to have arrays of sub-queries
+* Handling new "array" type to generate arrays of values from SQL results (first column only)
+* New examples
+
+### 1.0.0
+
+First release
