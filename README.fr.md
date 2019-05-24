@@ -82,6 +82,8 @@ Exemple de changement de structure :
       "donnees": "${WireMockCsv}"
     },
 
+* Baser le rendering sur un template, avec le paramètre `useResponseBodyAsStructure` (voir le chapitre Chaîner les extensions)
+
 Le requêtage permet de :
 
 * Lister les lignes d'une table, éventuellement en filtrant selon les paramètres HTTP.
@@ -319,6 +321,30 @@ Example :
       }
     }
 
+
+## Chainer les extensions
+
+Wiremock CSV permet de chainer entre elles différentes extensions. Deux modes possibles :
+
+* Utiliser le rendu fourni par une extension en amont.
+* Fournir du contenu pour le futur rendu d'une extension en aval.
+
+Les deux modes ne sont pas exclusifs : il est possible d'aditionner les deux fonctionnements.
+
+### Utiliser le rendu fourni par une extension en amont
+
+Un seul paramètre est à activer : `useResponseBodyAsStructure`. Ce paramètre permet de spécifier à WireMockCsv que le template de structure est fourni par une extension en amont.
+Le body provisoire de la réponse fourni en entrée de l'extension n'est donc pas écrasé mais utilisé comme template.
+
+Ce body doit donc comporter la variable `${WireMockCsv}` pour qu'elle soit remplacée par le contenu généré par l'extension WireMockCsv.
+
+Voir l'exemple "articlesFromTemplate" pour la mise en place.
+
+### Fournir du contenu pour une extension en aval
+
+_TODO_
+
+
 ## URL des json de test:
 
 Les URL ci-dessous sont valables si l'extension standalone a été lancée en local via l'un des deux moyens indiqués ci-dessus.
@@ -347,6 +373,10 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 * Recherche d'articles avec ou sans filtre
     * http://localhost:8181/rechercherArticles
     * http://localhost:8181/rechercherArticles?filtreLibelle=Cla
+
+* Recherche d'articles avec ou sans filtre (i.e. idem que précédemment) mais basée sur une réponse templatisée
+    * http://localhost:8181/articlesFromTemplate
+    * http://localhost:8181/articlesFromTemplate?filtreLibelle=Cla
 
 * Recherche de factures avec ou sans filtre, avec agrégation de données et changement de structure de résultat. Deux syntaxes présentées
     * http://localhost:8181/rechercherFactures

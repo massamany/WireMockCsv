@@ -64,13 +64,17 @@ public class WireMockCsv extends ResponseTransformer {
 		try {
 			final Map<String, Object> queries = this.getQueriesConfig(parameters);
 			final RequestConfigHandler requestConfig = this.config.getRequestConfigHandler(request, parameters);
+			
+			boolean useResponseBodyAsStructure = (Boolean) queries.get("useResponseBodyAsStructure");
 
-			final Object structure = queries.get("structure");
-			String jsonStructure;
-			if (structure == null) {
-				jsonStructure = "${WireMockCsv}";
+			String jsonStructure = "${WireMockCsv}";
+			if (useResponseBodyAsStructure) {
+				jsonStructure = response.getBodyAsString();
 			} else {
-				jsonStructure = structure instanceof String ? (String) structure : this.jsonConverter.convertObjectToJson(structure);
+				final Object structure = queries.get("structure");
+				if (structure != null) {
+					jsonStructure = structure instanceof String ? (String) structure : this.jsonConverter.convertObjectToJson(structure);
+				}
 			}
 
 			final QueryResults qr = this.executeQueries(requestConfig, queries);
@@ -224,7 +228,16 @@ public class WireMockCsv extends ResponseTransformer {
 		this.putConfigParameter(parameters, queries, "aliases");
 		this.putConfigParameter(parameters, queries, "resultType");
 		this.putConfigParameter(parameters, queries, "noLines");
+		this.putBooleanConfigParameter(parameters, queries, "useResponseBodyAsStructure");
 		return queries;
+	}
+
+	private void putBooleanConfigParameter(final Parameters parameters, final Map<String, Object> queries, final String key) {
+		if (parameters.containsKey(key)) {
+			queries.put(key, Boolean.parseBoolean(parameters.get(key).toString()));
+		} else {
+			queries.put(key, Boolean.FALSE);
+		}
 	}
 
 	private void putConfigParameter(final Parameters parameters, final Map<String, Object> queries, final String key) {

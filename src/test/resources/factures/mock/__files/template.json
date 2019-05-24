@@ -1,0 +1,5 @@
+{
+	"templatedRoot": {
+		"articlesData": ${WireMockCsv}
+	}
+}
