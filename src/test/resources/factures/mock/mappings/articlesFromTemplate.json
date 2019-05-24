@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/articlesFromTemplate"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "useResponseBodyAsStructure": "true",
+      "query": "SELECT a.* FROM article a WHERE a.\"libelle\" like '%${filtreLibelle}%'"
+    },
+    "bodyFileName": "template.json",
+    "transformers": ["response-template", "wiremock-csv"]
+  }
+}
