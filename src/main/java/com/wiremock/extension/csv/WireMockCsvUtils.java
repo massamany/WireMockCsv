@@ -30,7 +30,7 @@ public final class WireMockCsvUtils {
 			if (! done.contains(paramName)) {
 				Object paramValue = requestConfig.getParamValue(paramName);
 				paramValue = paramValue == null ? "" : paramValue;
-				newQuerySQL = newQuerySQL.replaceAll("\\$\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", paramValue.toString());
+				newQuerySQL = newQuerySQL.replaceAll("\\$\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", Matcher.quoteReplacement(paramValue.toString()));
 				done.add(paramName);
 			}
 		}
@@ -44,7 +44,7 @@ public final class WireMockCsvUtils {
 			if (! done.contains(paramName)) {
 				Object paramValue = requestConfig.getParamValue(paramName);
 				paramValue = paramValue == null ? "" : paramValue;
-				newQuerySQL = newQuerySQL.replaceAll("\\$\\[\\s*" + Pattern.quote(m.group(1)) + "\\s*\\]", paramValue.toString().replaceAll("'", "''"));
+				newQuerySQL = newQuerySQL.replaceAll("\\$\\[\\s*" + Pattern.quote(m.group(1)) + "\\s*\\]", Matcher.quoteReplacement(paramValue.toString().replaceAll("'", "''")));
 				done.add(paramName);
 			}
 		}
