@@ -18,13 +18,25 @@ public class WireMockCsvServerRunner {
 	public static void main(final String[] args) {
 		final CommandLineOptions options = new CommandLineOptions(args);
 		WireMockCsvServerRunner.filesRoot = options.filesRoot().getPath();
+		
+		String[] args2use = null;
+		for (int i = 0 ; i < args.length ; ++i) {
+			if ("--extensions".equals(args[i])) {
+				if (!args[i + 1].endsWith("com.wiremock.extension.csv.WireMockCsv")
+						&& ! args[i + 1].contains("com.wiremock.extension.csv.WireMockCsv,")) {
+					args[i + 1] += ",com.wiremock.extension.csv.WireMockCsv";
+				}
+				args2use = args;
+			}
+		}
 
-		final String[] args2 = new String[args.length + 2];
-		System.arraycopy(args, 0, args2, 0, args.length);
-		args2[args.length] = "--extensions";
-		args2[args.length + 1] = "com.wiremock.extension.csv.WireMockCsv";
-
-		WireMockServerRunner.main(args2);
+		if (args2use == null) {
+			args2use = new String[args.length + 2];
+			System.arraycopy(args, 0, args2use, 0, args.length);
+			args2use[args.length] = "--extensions";
+			args2use[args.length + 1] = "com.wiremock.extension.csv.WireMockCsv";
+		}
+		WireMockServerRunner.main(args2use);
 	}
 
 	/**
