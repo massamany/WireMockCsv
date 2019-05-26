@@ -1,0 +1,6 @@
+{
+	"dataToInclude": {
+		"date": "yyyy-MM-dd",
+		"time": "HH:mm:ss" 
+	}
+}

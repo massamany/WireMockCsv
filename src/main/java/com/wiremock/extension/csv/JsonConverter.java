@@ -59,6 +59,20 @@ public class JsonConverter {
 	 * Conversion d'un json quelconque en map.
 	 */
 	@SuppressWarnings("unchecked")
+	public Map<String, Object> convertJsonToMap(final String jsonContent) throws WireMockCsvException {
+		try {
+			return JsonConverter.MAPPER.readValue(jsonContent, Map.class);
+		} catch (final JsonProcessingException e) {
+			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
+		} catch (final IOException e) {
+			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.", e);
+		}
+	}
+
+	/**
+	 * Conversion d'un json quelconque en map.
+	 */
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> readJsonToMap(final File jsonFile) throws WireMockCsvException {
 		try {
 			return JsonConverter.MAPPER.readValue(jsonFile, Map.class);
@@ -81,7 +95,7 @@ public class JsonConverter {
 	}
 
 	/**
-	 * Conversion du {@link QueryResults} en List de Map, en Map ou en value, selon le flag "rsultType" du QueryResults.
+	 * Conversion du {@link QueryResults} en List de Map, en Map ou en value, selon le flag "resultType" du QueryResults.
 	 */
 	protected Object convert(final QueryResults qr) throws WireMockCsvException {
 		final Object obj;
@@ -130,7 +144,12 @@ public class JsonConverter {
 		final Map<String, Object> obj = new LinkedHashMap<>();
 		for (int i = 0; i < line.getColumns().length; i++) {
 			if (! line.isMasked(line.getColumns()[i])) {
-				this.addFieldToObject(obj, line.getColumns()[i].split("__"), line.getResult()[i]);
+				if (line.isConsideredAsJson(line.getColumns()[i])) {
+					this.addFieldToObject(obj, line.getColumns()[i].split("__"), 
+							line.getResult()[i] == null ? null : this.convertJsonToMap(line.getResult()[i].toString()));
+				} else {
+					this.addFieldToObject(obj, line.getColumns()[i].split("__"), line.getResult()[i]);
+				}
 			}
 		}
 		if (line.getSubResults() != null) {
