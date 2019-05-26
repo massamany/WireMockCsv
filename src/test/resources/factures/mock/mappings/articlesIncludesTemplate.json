@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/articlesIncludesTemplate"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "customParameters": {
+        "prev_template": {
+          "action": "fromPreviousResponse"
+        }
+      },
+      "query": "SELECT '$[prev_template]' as \"previous\", a.* FROM article a WHERE a.\"libelle\" like '%${filtreLibelle}%'",
+      "considerAsJson": ["previous"]
+    },
+    "bodyFileName": "templateToInclude.json",
+    "transformers": ["response-template", "wiremock-csv"]
+  }
+}

@@ -23,6 +23,8 @@ public class QueryResults {
 
 	private Set<String> maskedColumns;
 
+	private Set<String> consideredAsJsonColumns;
+
 	private final List<QueryResult> lines;
 
 	private String resultType;
@@ -96,6 +98,18 @@ public class QueryResults {
 		return this.maskedColumns != null && this.maskedColumns.contains(columnName);
 	}
 
+	public Set<String> getConsideredAsJsonColumns() {
+		return consideredAsJsonColumns;
+	}
+
+	public void setConsideredAsJsonColumns(Set<String> considerAsJsonColumns) {
+		this.consideredAsJsonColumns = considerAsJsonColumns;
+	}
+
+	public boolean isConsideredAsJson(final String columnName) {
+		return this.consideredAsJsonColumns != null && this.consideredAsJsonColumns.contains(columnName);
+	}
+
 	public String getResultType() {
 		return this.resultType;
 	}
@@ -140,6 +154,10 @@ public class QueryResults {
 
 		public boolean isMasked(final String columnName) {
 			return QueryResults.this.isMasked(columnName);
+		}
+
+		public boolean isConsideredAsJson(final String columnName) {
+			return QueryResults.this.isConsideredAsJson(columnName);
 		}
 	}
 }

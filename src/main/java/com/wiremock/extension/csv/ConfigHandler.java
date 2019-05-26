@@ -7,6 +7,7 @@ package com.wiremock.extension.csv;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
 import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.Response;
 import com.wiremock.extension.csv.QueryResults.QueryResult;
 
 import java.io.File;
@@ -41,8 +42,8 @@ public class ConfigHandler {
 		return this.globalConfig;
 	}
 
-	public RequestConfigHandler getRequestConfigHandler(final Request request, final Parameters parameters) throws WireMockCsvException {
-		return new RootConfigHandler(request, parameters);
+	public RequestConfigHandler getRequestConfigHandler(final Request request, final Response response, final Parameters parameters) throws WireMockCsvException {
+		return new RootConfigHandler(request, response, parameters);
 	}
 
 	/**
@@ -50,6 +51,7 @@ public class ConfigHandler {
 	 */
 	public interface RequestConfigHandler {
 		Request getRequest();
+		Response getPreviousResponse();
 		Parameters getTransformerParameters();
 		RequestConfigHandler addQueryResult(QueryResult qr, Map<String, Map<String, Object>> customParametersConfig)
 				throws WireMockCsvException;
@@ -130,6 +132,8 @@ public class ConfigHandler {
 						this.customParameters.put(e.getKey(), Arrays.asList(result.getLines().get(0).getResult()));
 					}
 				}
+			} else if ("fromPreviousResponse".equals(action)) {
+				this.customParameters.put(e.getKey(), Arrays.asList(getPreviousResponse().getBodyAsString()));
 			} else if ("escapeSql".equals(action)) {
 				final Object src = e.getValue().get("sourceParam");
 				final List<?> srcValue = this.getParamValues(src.toString());
@@ -154,12 +158,14 @@ public class ConfigHandler {
 	 */
 	private class RootConfigHandler extends AbstractConfigHandler {
 		private final Request request;
+		private final Response previousResponse;
 		private final Map<String, ? extends List<String>> requestParams;
 		private final Parameters transformerParameters;
 
-		public RootConfigHandler(final Request request, final Parameters transformerParameters) throws WireMockCsvException {
+		public RootConfigHandler(final Request request, final Response previousResponse, final Parameters transformerParameters) throws WireMockCsvException {
 			this.request = request;
-			//Let's keep the deprecated ùethod here, so that the extension is still compatible with older Wiremock versions
+			this.previousResponse = previousResponse;
+			//Let's keep the deprecated method here, so that the extension is still compatible with older Wiremock versions
 			this.requestParams = RequestTemplateModel.from(request).getQuery();
 			this.transformerParameters = transformerParameters;
 			@SuppressWarnings("unchecked")
@@ -171,6 +177,11 @@ public class ConfigHandler {
 		@Override
 		public Request getRequest() {
 			return this.request;
+		}
+
+		@Override
+		public Response getPreviousResponse() {
+			return this.previousResponse;
 		}
 
 		@Override
@@ -230,6 +241,11 @@ public class ConfigHandler {
 		@Override
 		public Request getRequest() {
 			return this.parent.getRequest();
+		}
+
+		@Override
+		public Response getPreviousResponse() {
+			return this.parent.getPreviousResponse();
 		}
 
 		@Override

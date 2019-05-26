@@ -44,7 +44,7 @@ public class WireMockCsv extends ResponseTransformer {
 			this.config = new ConfigHandler(this.manager, this.jsonConverter);
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
-			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.");
+			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.", e);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class WireMockCsv extends ResponseTransformer {
 			final Parameters parameters) {
 		try {
 			final Map<String, Object> queries = this.getQueriesConfig(parameters);
-			final RequestConfigHandler requestConfig = this.config.getRequestConfigHandler(request, parameters);
+			final RequestConfigHandler requestConfig = this.config.getRequestConfigHandler(request, response, parameters);
 			
 			boolean useResponseBodyAsStructure = (Boolean) queries.get("useResponseBodyAsStructure");
 
@@ -139,10 +139,18 @@ public class WireMockCsv extends ResponseTransformer {
 			//d'extraction en masse.
 			result = this.emptyQueryResult();
 		}
+		
 		if (result.getMaskedColumns() == null) {
 			@SuppressWarnings("unchecked")
-			final Set<String> mask = new HashSet<>(queries.get("mask") == null ? Collections.emptyList() : (List<String>) queries.get("mask"));
+			final Set<String> mask = new HashSet<>(
+					queries.get("mask") == null ? Collections.emptyList() : (List<String>) queries.get("mask"));
 			result.setMaskedColumns(mask);
+		}
+		if (result.getConsideredAsJsonColumns() == null) {
+			@SuppressWarnings("unchecked")
+			final Set<String> jsonCols = new HashSet<>(
+					queries.get("considerAsJson") == null ? Collections.emptyList() : (List<String>) queries.get("considerAsJson"));
+			result.setConsideredAsJsonColumns(jsonCols);
 		}
 
 		if (result.getResultType() == null) {
@@ -225,6 +233,7 @@ public class WireMockCsv extends ResponseTransformer {
 		this.putConfigParameter(parameters, queries, "query");
 		this.putConfigParameter(parameters, queries, "subqueries");
 		this.putConfigParameter(parameters, queries, "mask");
+		this.putConfigParameter(parameters, queries, "considerAsJson");
 		this.putConfigParameter(parameters, queries, "aliases");
 		this.putConfigParameter(parameters, queries, "resultType");
 		this.putConfigParameter(parameters, queries, "noLines");

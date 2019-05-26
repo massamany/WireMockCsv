@@ -103,7 +103,8 @@ Un requêtage est constitué de plusieurs composants :
     * "undefined" si pas de résultat (aucune ligne).
     * "null" si la valeur est nulle (une ligne avec champ null).
     * "default" pour une valeur non nulle non présente dans les conditions.
-* "mask" : Une liste des noms de colonnes résultats de la requête principale qui n'apparaîtront pas dans le JSon final, ceci permettant de récupérer des valeurs pour un paramètre de sous-requête. Autre avantage, utiliser le "select *" et supprimer une colonne du résultat afin d'obtenir requête moins verbeuse.
+* "mask" : Une liste des noms de colonnes résultats de la requête qui n'apparaîtront pas dans le JSon final, ceci permettant de récupérer des valeurs pour un paramètre de sous-requête. Autre avantage, utiliser le "select *" et supprimer une colonne du résultat afin d'obtenir requête moins verbeuse.
+* "considerAsJson": Une liste des noms de colonnes résultats de la requête qui seront considérées comme des chaînes JSon. Ceci signifiant qu'elle seront parsées en Objets et apparaîtront en tant que faisant partie du résuoltat JSon.
 * "aliases" : Alternative pour paramétrer les noms de sous-objets et de champs, évitant d'utiliser les alias de nom colonne.
 * "subqueries" : Il s'agit en fait simplement d'une Map de [String ; Requêtage]. La clé est le nom (champ JSon) de la sous-liste à récupérer et le requêtage est encore une fois un ensemble des composants "query", "subqueries", etc ... (sauf "noLines"). Il est ainsi possible d'imbriquer une infinité de sous-requêtes.
     * Le nom du champ JSON peut être formaté avec des "__" pour introduire plusieurs niveaux dans la hiérarchie d'objets.
@@ -249,13 +250,14 @@ Les opérations suivantes sont disponibles :
     * "prefix"
     * "suffix"
     * "separator"
-* "fromQuery": Utilise le résultat s'une requête SQL et le positionne dans un paramètre. Si la requête retourne plusieurs lignes ou plusieurs colonnes, le paramètre contiendra une liste. un résultat à plusieurs lignes et plusieurs colonnes ne sera pas géré. Paramètres :
+* "fromQuery": Utilise le résultat d'une requête SQL et le positionne dans un paramètre. Si la requête retourne plusieurs lignes ou plusieurs colonnes, le paramètre contiendra une liste. un résultat à plusieurs lignes et plusieurs colonnes ne sera pas géré. Paramètres :
     * "action": "fromQuery",
     * "query": LA requête à exécuter. Tous les paramètres existant y sont utilisables, y compris les custom déclarés avant.
 * "escapeSql": Echappe les quotes (') dans une ou plusieurs Strings pour les utiliser dans des chaines de caractères SQL. Paramètres :
     * "action": "escapeSql",
     * "sourceParam": Le nom du paramètre contenant les valeurs à échapper.
-
+* fromPreviousResponse: Permet de récupérer le body de la réponse précédente, fournie en paramètre à WireMockCsv, pour le placer dans une variable. Paramètres :
+    * "action": "fromPreviousResponse",
 
 Example :
 
@@ -333,6 +335,12 @@ Les deux modes ne sont pas exclusifs : il est possible d'aditionner les deux fon
 
 ### Utiliser le rendu fourni par une extension en amont
 
+Dans ce mode, deux fonctionnements sont possibles :
+
+#### Utiliser la réponse précédente comme template principal
+
+Les données générées par WireMockCsv seront incluses dans les données rendues par l'extension en amont.
+
 Un seul paramètre est à activer : `useResponseBodyAsStructure`. Ce paramètre permet de spécifier à WireMockCsv que le template de structure est fourni par une extension en amont.
 Le body provisoire de la réponse fourni en entrée de l'extension n'est donc pas écrasé mais utilisé comme template.
 
@@ -340,9 +348,19 @@ Ce body doit donc comporter la variable `${WireMockCsv}` pour qu'elle soit rempl
 
 Voir l'exemple "articlesFromTemplate" pour la mise en place.
 
+#### Utiliser le rendu de WireMockCsv comme template principal
+
+Les données générées par l'extension en amont seront incluses dans les données rendues par WireMockCsv.
+
+Pour obtenir ce résultat, il est nécessaire de passer par un "customParameters" avec l'action "fromPreviousResponse" et d'activer le paramère "considerAsJson".
+
+Voir l'exemple "articlesIncludesTemplate" pour la mise en place.
+
 ### Fournir du contenu pour une extension en aval
 
-_TODO_
+Pour qu'une extension en aval profite du contenu généré par WireMockCsv, il suffit simplement que cette extension soit capable de lire / modifier le body positionné par WireMockCsv dans la Response.
+
+Il n'y a aucune action particulière à effectuer pour WireMockCsv.
 
 
 ## URL des json de test:
@@ -377,6 +395,10 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 * Recherche d'articles avec ou sans filtre (i.e. idem que précédemment) mais basée sur une réponse templatisée
     * http://localhost:8181/articlesFromTemplate
     * http://localhost:8181/articlesFromTemplate?filtreLibelle=Cla
+
+* Recherche d'articles avec ou sans filtre (i.e. idem que précédemment) mais incluant le body json de la réponse précedente
+    * http://localhost:8181/articlesIncludesTemplate
+    * http://localhost:8181/articlesIncludesTemplate?filtreLibelle=Cla
 
 * Recherche de factures avec ou sans filtre, avec agrégation de données et changement de structure de résultat. Deux syntaxes présentées
     * http://localhost:8181/rechercherFactures
