@@ -84,20 +84,9 @@ public class JsonConverter {
 	}
 
 	/**
-	 * Conversion du {@link QueryResults} en json
-	 */
-	public String convertToJson(final QueryResults qr) throws WireMockCsvException {
-		try {
-			return this.writeValueAsString(this.convert(qr));
-		} catch (final IOException e) {
-			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
-		}
-	}
-
-	/**
 	 * Conversion du {@link QueryResults} en List de Map, en Map ou en value, selon le flag "resultType" du QueryResults.
 	 */
-	protected Object convert(final QueryResults qr) throws WireMockCsvException {
+	public Object convert(final QueryResults qr) throws WireMockCsvException {
 		final Object obj;
 		if ("value".equals(qr.getResultType())) {
 			if (qr.getLines().isEmpty() || qr.getLines().get(0).getResult().length == 0) {
