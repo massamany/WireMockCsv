@@ -256,6 +256,9 @@ The following operations are available:
     * "sourceParam": Name of the parameter containing the values to escape.
 * fromPreviousResponse: Retrieves the body of the previous response provided as a parameter to WireMockCsv, in order to put it in a variable. Parameters :
     * "action": "fromPreviousResponse",
+* "pathParam": Allows to retrieve a path variable to inject it into a parameter. Parameters :
+    * "action": "pathParam",
+    * "index": Index of the path param. Warn: first index is "1". Example: with the path `/mock/123/test` then `123` is at index 2.
 
 
 Example:
@@ -443,6 +446,9 @@ In addition, this example uses a global configuration file allowing to change th
 
 * Extract data, by specifying only sub-queries
     * http://localhost:8181/extraction
+
+* Path param example: customer / invoice / line (since 1.2.0)
+    * http://localhost:8181/client/CLI01/facture/FAC01/ligne/L01_01
 
 * Dumb examples to show other possibilities on custom parameters
     * http://localhost:8181/testCustomParamFromQuery1

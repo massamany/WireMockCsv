@@ -258,6 +258,9 @@ Les opérations suivantes sont disponibles :
     * "sourceParam": Le nom du paramètre contenant les valeurs à échapper.
 * fromPreviousResponse: Permet de récupérer le body de la réponse précédente, fournie en paramètre à WireMockCsv, pour le placer dans une variable. Paramètres :
     * "action": "fromPreviousResponse",
+* "pathParam": Permet de récupérer une variable dans le path pour l'injecter dans un paramètre. Paramètres :
+    * "action": "pathParam",
+    * "index": Index du path param. Attention, numérotation à partir de "1". Exemple : avec le path `/mock/123/test` alors `123` sera en position 2.
 
 Example :
 
@@ -444,6 +447,9 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 
 * Faire une extraction de données, en ne spécifiant que des subqueries
     * http://localhost:8181/extraction
+
+* Exemple de path param : client / facture / ligne (depuis 1.2.0)
+    * http://localhost:8181/client/CLI01/facture/FAC01/ligne/L01_01
 
 * Autres examples pour montrer d'autres possibilités avec les paramètres custom
     * http://localhost:8181/testCustomParamFromQuery1
