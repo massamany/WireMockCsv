@@ -61,12 +61,6 @@
 			<groupId>com.github.tomakehurst</groupId>
 			<artifactId>wiremock-standalone</artifactId>
 			<version>2.23.2</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.ow2.asm</groupId>
-					<artifactId>asm</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
@@ -74,24 +68,14 @@
 			<version>2.4.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.9.9</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.9.9</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.9.9</version>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-csv</artifactId>
 			<version>2.9.9</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
 		</dependency>
 	</dependencies>
 
@@ -136,7 +120,9 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<descriptors><descriptor>src/main/assembly/with-dependencies.xml</descriptor></descriptors>
+							<descriptors>
+								<descriptor>src/main/assembly/with-dependencies.xml</descriptor>
+							</descriptors>
 							<appendAssemblyId>true</appendAssemblyId>
 						</configuration>
 					</execution>
@@ -153,7 +139,9 @@
 									<mainClass>com.wiremock.extension.csv.WireMockCsvServerRunner</mainClass>
 								</manifest>
 							</archive>
-							<descriptors><descriptor>src/main/assembly/standalone.xml</descriptor></descriptors>
+							<descriptors>
+								<descriptor>src/main/assembly/standalone.xml</descriptor>
+							</descriptors>
 							<appendAssemblyId>true</appendAssemblyId>
 						</configuration>
 					</execution>

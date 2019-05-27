@@ -1,14 +1,53 @@
 package com.wiremock.extension.csv;
 
+import com.wiremock.extension.csv.ConfigHandler.RequestConfigHandler;
+
+import org.apache.commons.beanutils.BeanUtilsBean;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.wiremock.extension.csv.ConfigHandler.RequestConfigHandler;
-
 public final class WireMockCsvUtils {
 
 	private WireMockCsvUtils() {
+	}
+
+	/**
+	 * Remplace la variable "${WireMockCsv} dans le body final, en prenant en compte
+	 * les variantes : ${WireMockCsv.subValue}, ${WireMockCsv[0].subValue}, ${WireMockCsv.subValue[0].subSubValue}, ...
+	 *
+	 * @param querySQL
+	 * @param requestConfig
+	 * @return la nouvelle requete SQL
+	 */
+	public static String replaceInStructure(
+			JsonConverter jsonConverter, String jsonStructure, final QueryResults qr) throws WireMockCsvException {
+		Object result = jsonConverter.convert(qr);
+		
+		// Partie 1: Remplacement de la variable WireMock sans variante.
+		//TODO A optimiser : ne faire la conversion JSon que si nécessaire (via un DynamicCharSequence par exemple)
+		String json = jsonConverter.convertObjectToJson(result);
+		String body = Pattern.compile("\\\"?\\$\\{WireMockCsv\\}\\\"?").matcher(jsonStructure).replaceAll(Matcher.quoteReplacement(json));
+		
+		// Partie 2: Remplacement des variantes.
+		HashMap<String, Object> holder = new HashMap<>();
+		holder.put("WireMockCsv", result);
+		Matcher m = Pattern.compile("\\\"?\\$\\{(WireMockCsv[\\.\\[][^\\}]*)}\\\"?").matcher(jsonStructure);
+		while (m.find()) {
+			final String subName = m.group(1);
+			try {
+				Object subValue = BeanUtilsBean.getInstance().getPropertyUtils().getProperty(holder, subName);
+				String subJson = jsonConverter.convertObjectToJson(subValue);
+				body = body.replaceAll("\\\"?\\$\\{" + Pattern.quote(subName) + "}\\\"?", Matcher.quoteReplacement(subJson));
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+				throw new WireMockCsvException("Erreur lors de l'accès à la propriété " + subName + '.', e);
+			}
+		}
+
+		return body;
 	}
 
 	/**
@@ -30,7 +69,7 @@ public final class WireMockCsvUtils {
 			if (! done.contains(paramName)) {
 				Object paramValue = requestConfig.getParamValue(paramName);
 				paramValue = paramValue == null ? "" : paramValue;
-				newQuerySQL = newQuerySQL.replaceAll("\\$\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", Matcher.quoteReplacement(paramValue.toString()));
+				newQuerySQL = newQuerySQL.replaceAll("\\$\\{\\s*" + Pattern.quote(paramName) + "\\s*\\}", Matcher.quoteReplacement(paramValue.toString()));
 				done.add(paramName);
 			}
 		}
@@ -44,7 +83,7 @@ public final class WireMockCsvUtils {
 			if (! done.contains(paramName)) {
 				Object paramValue = requestConfig.getParamValue(paramName);
 				paramValue = paramValue == null ? "" : paramValue;
-				newQuerySQL = newQuerySQL.replaceAll("\\$\\[\\s*" + Pattern.quote(m.group(1)) + "\\s*\\]", Matcher.quoteReplacement(paramValue.toString().replaceAll("'", "''")));
+				newQuerySQL = newQuerySQL.replaceAll("\\$\\[\\s*" + Pattern.quote(paramName) + "\\s*\\]", Matcher.quoteReplacement(paramValue.toString().replaceAll("'", "''")));
 				done.add(paramName);
 			}
 		}

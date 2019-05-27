@@ -79,9 +79,7 @@ public class WireMockCsv extends ResponseTransformer {
 
 			final QueryResults qr = this.executeQueries(requestConfig, queries);
 			final Builder builder = Response.Builder.like(response).but();
-			String body = jsonStructure
-					.replace("\"${WireMockCsv}\"", "${WireMockCsv}")
-					.replace("${WireMockCsv}", this.jsonConverter.convertToJson(qr));
+			String body = WireMockCsvUtils.replaceInStructure(this.jsonConverter, jsonStructure, qr);
 			if (qr.getLines().isEmpty() && queries.containsKey("noLines")) {
 				@SuppressWarnings("unchecked")
 				final

@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/extraction2"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "subqueries": {
+        "factures": {
+          "query": "SELECT * FROM facture order by \"code\" desc"
+        },
+        "clients": {
+          "query": "SELECT * FROM client"
+        },
+        "articles": {
+          "query": "SELECT * FROM article"
+        }
+      },
+      "resultType":"object",
+      "structure": {
+        "referentiel": {
+          "articles": "${WireMockCsv.articles}",
+          "clients": "${WireMockCsv.clients}"
+        },
+        "ventes": {"factures": "${WireMockCsv.factures}"},
+        "codeDerniereFacture": "${WireMockCsv.factures.[0].code}"
+      }
+    },
+    "transformers": ["wiremock-csv"]
+  }
+}

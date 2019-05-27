@@ -61,11 +61,23 @@ C'est tout ! :-)
 
 *Remarque préliminaire : Il est possible de mixer les mappings et files standards de WireMock avec les fichiers spécifiques du transformers.*
 
+#### Concept
+
 Le concept est simple: interroger en SQL la BDD CSV, et mapper les résultats en JSON en utilisant les nom de colonnes en tant que nom de champs.
 
 Le "jsonBody" standard est remplacé par 2 valeurs :
 * "transformers": ["wiremock-csv"]
 * "transformerParameters": { Structure, Requêtage }
+
+#### Requêtage
+
+Le requêtage permet de :
+
+* Lister les lignes d'une table, éventuellement en filtrant selon les paramètres HTTP.
+* Faire des jointures, des sous-select, etc ... sur les données.
+* Obtenir une grappe d'objets complexes en résultat, avec sous-objets imbriqués et sous-listes.
+
+#### Structure
 
 La structure permet de définir la structure attendue du résultat et où y sera intégré le résultat du requêtage. L'emplacement du résultat est représenté par un paramètre nommé "${WireMockCsv}".
 La structure par défaut est `${WireMockCsv}`, pour simplement renvoyer le résultat en format JSON.
@@ -80,15 +92,53 @@ Exemple de changement de structure :
 
     "structure": {
       "donnees": "${WireMockCsv}"
-    },
+    }
 
 * Baser le rendering sur un template, avec le paramètre `useResponseBodyAsStructure` (voir le chapitre Chaîner les extensions)
 
-Le requêtage permet de :
+A noter que le paramètre ${WireMockCsv} représente l'intégralité du JSon généré par le requêtage.
+Il est possible de récupérer des sous-parties du résultat du requêtage pour obtenir une personnalisation plus fine de la structure. La syntaxe est celle d'Apache commons Bean Utils.
 
-* Lister les lignes d'une table, éventuellement en filtrant selon les paramètres HTTP.
-* Faire des jointures, des sous-select, etc ... sur les données.
-* Obtenir une grappe d'objets complexes en résultat, avec sous-objets imbriqués et sous-listes.
+Ceci est particulièrement intéressant pour la surcharge spécifique à la requête.
+
+Par exemple, si le résultat JSon est :
+
+    {
+      "champ1": {
+        "sousChamp11" : "valeur 11",
+        "sousChamp12" : "valeur 12",
+      },
+      "champ2": {
+        "sousChamp21" : "valeur 21"
+        "sousChamp22" : "valeur 22"
+      }
+    }
+
+On peut construire une structure comme suit :
+
+    "structure": {
+      "donnees": [
+      	"${WireMockCsv.champ1}",
+      	"${WireMockCsv.champ2}"
+    }
+
+Auquel cas le résultat final sera :
+
+    "structure": {
+      "donnees": [
+      	{
+          "sousChamp11" : "valeur 11",
+          "sousChamp12" : "valeur 12",
+        },
+      	"champ2": {
+          "sousChamp21" : "valeur 21"
+          "sousChamp22" : "valeur 22"
+        }
+      ]
+    }
+
+Voir l'exemple "extraction2" pour la mise en place.
+
 
 ### Construire son requêtage
 
@@ -447,6 +497,9 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 
 * Faire une extraction de données, en ne spécifiant que des subqueries
     * http://localhost:8181/extraction
+
+* Faire une extraction de données, en ne spécifiant que des subqueries, et personnalisant la structure du template
+    * http://localhost:8181/extraction2
 
 * Exemple de path param : client / facture / ligne (depuis 1.2.0)
     * http://localhost:8181/client/CLI01/facture/FAC01/ligne/L01_01
