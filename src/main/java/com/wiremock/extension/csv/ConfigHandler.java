@@ -4,12 +4,6 @@
 
 package com.wiremock.extension.csv;
 
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
-import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.Response;
-import com.wiremock.extension.csv.QueryResults.QueryResult;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.github.tomakehurst.wiremock.extension.Parameters;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
+import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.Response;
+import com.wiremock.extension.csv.QueryResults.QueryResult;
+
+import wiremock.org.apache.commons.lang3.StringUtils;
 
 /**
  * Permet de gérer la configuration et les paramètres à l'exécution d'une requête.<br>
@@ -142,6 +144,17 @@ public class ConfigHandler {
 							srcValue.stream().map(o -> o == null ? null : o.toString().replaceAll("'", "''")).collect(Collectors.toList()));
 				} else {
 					this.customParameters.remove(e.getKey());
+				}
+			} else if ("pathParam".equals(action)) {
+				Request request = getRequest();
+				if (request != null && !StringUtils.isEmpty(request.getUrl()) && e.getValue().get("index") != null) {
+					String[] split = request.getUrl().split("/");
+					Integer index = (Integer) e.getValue().get("index");
+					if (index < split.length) {
+						customParameters.put(e.getKey(), Collections.singletonList(split[index]));
+					} else {
+						throw new WireMockCsvException("Index PathParam supérieur au nombre d'argument trouvé dans le path");
+					}
 				}
 			} else {
 				throw new WireMockCsvException("Unknown action: " + action);
