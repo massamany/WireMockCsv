@@ -179,7 +179,15 @@ public class ConfigHandler {
 			this.request = request;
 			this.previousResponse = previousResponse;
 			//Let's keep the deprecated method here, so that the extension is still compatible with older Wiremock versions
-			this.requestParams = RequestTemplateModel.from(request).getQuery();
+			//Knowing that with new Wiremock versions, we should write this.requestParams = RequestLine.fromRequest(request).getQuery();
+			Map<String, ? extends List<String>> tmpRequestParams;
+			try {
+				tmpRequestParams = RequestTemplateModel.from(request).getQuery();
+			} catch (Throwable t) {
+				// This could happen if getQuery() (deprecated version) disappears. We would the use the new version (not deprecated).
+				tmpRequestParams = RequestTemplateModel.from(request).getRequestLine().getQuery();
+			}
+			this.requestParams = tmpRequestParams;
 			this.transformerParameters = transformerParameters;
 			@SuppressWarnings("unchecked")
 			final Map<String, Map<String, Object>> customParametersConfig =

@@ -9,6 +9,11 @@
 
 Cette extension WireMock permet de lire des données depuis des CSV avec une syntaxe SQL, dans le but de générer automatiquement les JSon de réponse avec ces données.
 
+Les livrables sont compilés avec la version 2.23.2 de WireMock, dont les binaires sont embarqués dans la version standalone.
+Cependant, les autres livrables sont compatibles avec les versions plus anciennes (testée : 2.6.0 OK) et plus récentes. Tout retour sur une détection d'incompatibilité aidera à la maintenance de l'extension.
+
+Pour tout retour / demande d'aide / signalement de bug / etc ... Merci d'utiliser le Issues Github.  
+
 ## Construire le livrable:
 
 Maven 3 et un JDK 8 sont nécessaires pour construire l'archive. Ensuite, la commande suivante est à lancer :
@@ -512,6 +517,20 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 
 
 ## Changes history:
+
+### 1.2.0
+
+* Updated dependencies versions:
+    * Wiremock from 2.6.0 to 2.23.2
+    * HSQLDB from 2.3.4 to 2.4.1
+    * Jackson from 2.8.7 to 2.9.9
+    * Build plugins
+* Introduced extension chaining
+* Now handling path variables
+* Possibility to reference result sub properties in template structure
+* Improved compatibility with various wiremock versions
+* (Fix) wiremockcsv launcher now accepts to load other extensions
+* (Fix) regex for variable replacement
 
 ### 1.1.1
 
