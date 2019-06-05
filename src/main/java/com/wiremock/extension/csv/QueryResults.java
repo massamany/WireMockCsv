@@ -31,6 +31,8 @@ public class QueryResults {
 
 	/**
 	 * Constructeur sans resultset.
+	 * @param columns Result columns names
+	 * @param lines Result lines
 	 */
 	public QueryResults(final String[] columns, final List<QueryResult> lines) {
 		this.columns = columns;
@@ -39,8 +41,9 @@ public class QueryResults {
 
 	/**
 	 * Constructeur parsant un resultset SQL.
-	 * @param rs
-	 * @throws SQLException
+	 * @param rs Query results
+	 * @param aliases Column names aliases
+	 * @throws SQLException When an exception occurs in request execution
 	 */
 	public QueryResults(final ResultSet rs, final Map<String, Map<String, Object>> aliases) throws SQLException {
 		final Map<String, Map<String, Object>> aliasesUp = new HashMap<>();

@@ -22,7 +22,7 @@ public class DbManager {
 
 	/**
 	 * Constructor
-	 *
+	 * @param csvPath Path to csv files directory
 	 */
 	public DbManager(final String csvPath) {
 		this.csvPath = csvPath;
@@ -31,6 +31,7 @@ public class DbManager {
 	/**
 	 * Connexion a la base de donnée
 	 *
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public void dbConnect() throws WireMockCsvException {
 		try {
@@ -44,6 +45,7 @@ public class DbManager {
 	/**
 	 * Deconnexion de la base de donnée
 	 *
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public void dbDisconnect() throws WireMockCsvException {
 		try {
@@ -60,8 +62,11 @@ public class DbManager {
 	/**
 	 * Fonction permettant d'exécuter la requete SQL de lecture dont le résultat sera retourné.
 	 *
-	 * @param querySQL
-	 * @param aliases
+	 * @param querySQL SQL Query to execute
+	 * @param aliases Columns names aliases
+	 * @return Query execution results
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public QueryResults select(final String querySQL, final Map<String, Map<String, Object>> aliases) throws WireMockCsvException {
 		try (final Statement stmt = this.dbConnection.createStatement();

@@ -32,8 +32,10 @@ public class JsonConverter {
 
 	/**
 	 * Formats json string
-	 *
-	 * @throws WireMockCsvException
+	 * @param json JSon string to format
+	 * @return Formatted string
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public String formatJson(final String json) throws WireMockCsvException {
 		try {
@@ -46,6 +48,10 @@ public class JsonConverter {
 
 	/**
 	 * Conversion d'un objet quelconque en json.
+	 * @param object Object to convert to JSon
+	 * @return JSon string
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public String convertObjectToJson(final Object object) throws WireMockCsvException {
 		try {
@@ -57,6 +63,10 @@ public class JsonConverter {
 
 	/**
 	 * Conversion d'un json quelconque en map.
+	 * @param jsonContent JSon content to convert
+	 * @return Map
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> convertJsonToMap(final String jsonContent) throws WireMockCsvException {
@@ -71,6 +81,10 @@ public class JsonConverter {
 
 	/**
 	 * Conversion d'un json quelconque en map.
+	 * @param jsonFile File to read
+	 * @return Map
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> readJsonToMap(final File jsonFile) throws WireMockCsvException {
@@ -85,6 +99,10 @@ public class JsonConverter {
 
 	/**
 	 * Conversion du {@link QueryResults} en List de Map, en Map ou en value, selon le flag "resultType" du QueryResults.
+	 * @param qr All result lines
+	 * @return Object
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public Object convert(final QueryResults qr) throws WireMockCsvException {
 		final Object obj;
@@ -114,6 +132,10 @@ public class JsonConverter {
 
 	/**
 	 * Conversion du {@link QueryResults} en List de Map
+	 * @param qr All result lines
+	 * @return List of Map
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public List<Map<String, Object>> convertToMapList(final QueryResults qr) throws WireMockCsvException {
 		final List<Map<String, Object>> list = new ArrayList<>();
@@ -128,6 +150,10 @@ public class JsonConverter {
 
 	/**
 	 * Conversion du {@link QueryResult} en Map
+	 * @param line One result line
+	 * @return Map
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public Map<String, Object> convertToMap(final QueryResult line) throws WireMockCsvException {
 		final Map<String, Object> obj = new LinkedHashMap<>();

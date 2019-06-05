@@ -19,9 +19,12 @@ public final class WireMockCsvUtils {
 	 * Remplace la variable "${WireMockCsv} dans le body final, en prenant en compte
 	 * les variantes : ${WireMockCsv.subValue}, ${WireMockCsv[0].subValue}, ${WireMockCsv.subValue[0].subSubValue}, ...
 	 *
-	 * @param querySQL
-	 * @param requestConfig
+	 * @param jsonConverter Json converter instance
+	 * @param jsonStructure Base jSon template
+	 * @param qr Query execution results
 	 * @return la nouvelle requete SQL
+	 * 
+	 * @throws WireMockCsvException When a technical exception occurs
 	 */
 	public static String replaceInStructure(
 			JsonConverter jsonConverter, String jsonStructure, final QueryResults qr) throws WireMockCsvException {
@@ -53,8 +56,8 @@ public final class WireMockCsvUtils {
 	/**
 	 * Remplace les variables dans la requête SQL.
 	 *
-	 * @param querySQL
-	 * @param requestConfig
+	 * @param querySQL SQL Query
+	 * @param requestConfig Run configuration
 	 * @return la nouvelle requete SQL
 	 */
 	public static String replaceQueryVariables(final String querySQL, final RequestConfigHandler requestConfig) {
@@ -93,6 +96,7 @@ public final class WireMockCsvUtils {
 
     /**
      * Computes files root to use between runner and csv-root-dir system property. Don't use WireMockCsvServerRunner.filesRoot() directly.
+	 * @return Path to files root
      */
     public static String getFilesRoot() {
         return System.getProperty("csv-root-dir",
