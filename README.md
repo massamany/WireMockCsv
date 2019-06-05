@@ -311,6 +311,7 @@ The following operations are available:
     * "sourceParam": Name of the parameter containing the values to escape.
 * fromPreviousResponse: Retrieves the body of the previous response provided as a parameter to WireMockCsv, in order to put it in a variable. Parameters :
     * "action": "fromPreviousResponse",
+    * "subProperty": Name of the sub property to extract from the template JSon content.
 * "pathParam": Allows to retrieve a path variable to inject it into a parameter. Parameters :
     * "action": "pathParam",
     * "index": Index of the path param. Warn: first index is "1". Example: with the path `/mock/123/test` then `123` is at index 2.
@@ -409,9 +410,16 @@ See example "articlesFromTemplate".
 
 The data rendered by the previous extension will be included in the data rendered by WireMockCsv.
 
+The concept is to put the full template content in a custom parameter, or part(s) of the template content in one or more custom parameter(s).
+
+Then, the variable(s) will be used in the SQL request, knowing that its(their) content must be interpreted as JSon.
+
 To obtain this result, it's necessary to use a "customParameters" with the action "fromPreviousResponse" and to activate the parameter "considerAsJson".
 
-See example "articlesIncludesTemplate".
+See the following examples:
+* "articlesIncludesTemplate": full use of the template
+* "articlesIncludesTemplate2": partial use of the template
+* "articlesIncludesTemplate3": several partial uses of the template
 
 ### Provide data to a following extension
 
@@ -456,6 +464,8 @@ In addition, this example uses a global configuration file allowing to change th
 * Search articles (i.e. same as previous) but including the json body from the previous response
     * http://localhost:8181/articlesIncludesTemplate
     * http://localhost:8181/articlesIncludesTemplate?filtreLibelle=Cla
+    * http://localhost:8181/articlesIncludesTemplate2 (Only part of the template)
+    * http://localhost:8181/articlesIncludesTemplate3 (2 parts of the template used separately)
 
 * Search invoices with or without filtering, with data aggregation and result structure changes. Two different syntaxes demonstrated
     * http://localhost:8181/rechercherFactures

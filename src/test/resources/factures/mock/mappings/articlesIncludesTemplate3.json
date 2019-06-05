@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/articlesIncludesTemplate3"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json; charset=utf-8" },
+    "transformerParameters":{
+      "customParameters": {
+        "prev_template_date": {
+          "action": "fromPreviousResponse",
+          "subProperty": "dataToInclude.date"
+        },
+        "prev_template_time": {
+          "action": "fromPreviousResponse",
+          "subProperty": "dataToInclude.time"
+        }
+      },
+      "query": "SELECT '$[prev_template_date]' as \"date_from_template\", '$[prev_template_time]' as \"time_from_template\", a.* FROM article a WHERE a.\"libelle\" like '%${filtreLibelle}%'",
+      "considerAsJson": ["date_from_template", "time_from_template"]
+    },
+    "bodyFileName": "templateToInclude.json",
+    "transformers": ["response-template", "wiremock-csv"]
+  }
+}

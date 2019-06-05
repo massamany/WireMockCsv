@@ -5,6 +5,7 @@
 package com.wiremock.extension.csv;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.apache.commons.beanutils.BeanUtilsBean;
 
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
@@ -29,6 +32,7 @@ import wiremock.org.apache.commons.lang3.StringUtils;
 public class ConfigHandler {
 	private final Map<String, Object> globalConfig;
 	private final DbManager manager;
+	private JsonConverter jsonConverter;
 
 	public ConfigHandler(final DbManager manager, final JsonConverter jsonConverter) throws WireMockCsvException {
 		final File configFile = new File(WireMockCsvUtils.getFilesRoot() + File.separatorChar + "csv" + File.separatorChar + "WireMockCsv.json.conf");
@@ -38,6 +42,7 @@ public class ConfigHandler {
 			this.globalConfig = Collections.emptyMap();
 		}
 		this.manager = manager;
+		this.jsonConverter = jsonConverter;
 	}
 
 	public Map<String, Object> getGlobalConfig() {
@@ -69,39 +74,39 @@ public class ConfigHandler {
 		protected void initCustomParameters(final Map<String, Map<String, Object>> customParametersConfig) throws WireMockCsvException {
 			if (customParametersConfig != null) {
 				this.customParameters = new HashMap<>();
-				for (final Map.Entry<String, Map<String, Object>> e: customParametersConfig.entrySet()) {
-					this.initCustomParameter(e);
+				for (final Map.Entry<String, Map<String, Object>> customParameterConfig: customParametersConfig.entrySet()) {
+					this.initCustomParameter(customParameterConfig);
 				}
 			}
 		}
 
-		private void initCustomParameter(final Map.Entry<String, Map<String, Object>> e) throws WireMockCsvException {
-			final String action = (String) e.getValue().get("action");
+		private void initCustomParameter(final Map.Entry<String, Map<String, Object>> customParameterConfig) throws WireMockCsvException {
+			final String action = (String) customParameterConfig.getValue().get("action");
 			if ("split".equals(action)) {
-				final Object src = e.getValue().get("sourceParam");
-				final Object regexp = e.getValue().get("regexp");
+				final Object src = customParameterConfig.getValue().get("sourceParam");
+				final Object regexp = customParameterConfig.getValue().get("regexp");
 				final Object srcValue = this.getParamValue(src.toString());
 				if (srcValue != null) {
-					this.customParameters.put(e.getKey(), Arrays.asList(Pattern.compile(regexp.toString()).split(srcValue.toString())));
+					this.customParameters.put(customParameterConfig.getKey(), Arrays.asList(Pattern.compile(regexp.toString()).split(srcValue.toString())));
 				} else {
-					this.customParameters.remove(e.getKey());
+					this.customParameters.remove(customParameterConfig.getKey());
 				}
 			} else if ("replace".equals(action)) {
-				final Object src = e.getValue().get("sourceParam");
-				final Object regexp = e.getValue().get("regexp");
-				final Object replacement = e.getValue().getOrDefault("replacement", "");
+				final Object src = customParameterConfig.getValue().get("sourceParam");
+				final Object regexp = customParameterConfig.getValue().get("regexp");
+				final Object replacement = customParameterConfig.getValue().getOrDefault("replacement", "");
 				final Object srcValue = this.getParamValue(src.toString());
 				if (srcValue != null) {
-					this.customParameters.put(e.getKey(),
+					this.customParameters.put(customParameterConfig.getKey(),
 							Arrays.asList(Pattern.compile(regexp.toString()).matcher(srcValue.toString()).replaceAll(replacement.toString())));
 				} else {
-					this.customParameters.remove(e.getKey());
+					this.customParameters.remove(customParameterConfig.getKey());
 				}
 			} else if ("concatenate".equals(action)) {
-				final Object src = e.getValue().get("sourceParam");
-				final Object prefix = e.getValue().getOrDefault("prefix", "");
-				final Object suffix = e.getValue().getOrDefault("suffix", "");
-				final Object separator = e.getValue().getOrDefault("separator", "");
+				final Object src = customParameterConfig.getValue().get("sourceParam");
+				final Object prefix = customParameterConfig.getValue().getOrDefault("prefix", "");
+				final Object suffix = customParameterConfig.getValue().getOrDefault("suffix", "");
+				final Object separator = customParameterConfig.getValue().getOrDefault("separator", "");
 				final List<?> srcValues = this.getParamValues(src.toString());
 				final StringBuilder sb = new StringBuilder();
 				sb.append(prefix);
@@ -112,9 +117,9 @@ public class ConfigHandler {
 					}
 				}
 				sb.append(suffix);
-				this.customParameters.put(e.getKey(), Arrays.asList(sb.toString()));
+				this.customParameters.put(customParameterConfig.getKey(), Arrays.asList(sb.toString()));
 			} else if ("fromQuery".equals(action)) {
-				Object query = e.getValue().get("query");
+				Object query = customParameterConfig.getValue().get("query");
 				query = WireMockCsvUtils.replaceQueryVariables(query.toString(), this);
 				final QueryResults result = ConfigHandler.this.manager.select(query.toString(), null);
 				if (result.getColumns().length > 1 && result.getLines().size() > 1) {
@@ -123,35 +128,47 @@ public class ConfigHandler {
 				}
 				if (result.getLines().size() > 1) {
 					// Liste de toutes les lignes, première colonne uniquement.
-					this.customParameters.put(e.getKey(),
+					this.customParameters.put(customParameterConfig.getKey(),
 							result.getLines().stream().map(qr -> qr.getResult()[0]).collect(Collectors.toList()));
 				} else {
 					if (result.getLines().isEmpty()) {
 						// Pas de résultat
-						this.customParameters.remove(e.getKey());
+						this.customParameters.remove(customParameterConfig.getKey());
 					} else {
 						// Liste de toutes les colonnes
-						this.customParameters.put(e.getKey(), Arrays.asList(result.getLines().get(0).getResult()));
+						this.customParameters.put(customParameterConfig.getKey(), Arrays.asList(result.getLines().get(0).getResult()));
 					}
 				}
 			} else if ("fromPreviousResponse".equals(action)) {
-				this.customParameters.put(e.getKey(), Arrays.asList(getPreviousResponse().getBodyAsString()));
+				String content = getPreviousResponse().getBodyAsString();
+				final Object subProperty = customParameterConfig.getValue().get("subProperty");
+				if (subProperty != null) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> map = ConfigHandler.this.jsonConverter.convertJsonToObject(content, Map.class);
+					try {
+						Object subValue = BeanUtilsBean.getInstance().getPropertyUtils().getProperty(map, subProperty.toString());
+						content = ConfigHandler.this.jsonConverter.convertObjectToJson(subValue);
+					} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+						throw new WireMockCsvException("Erreur lors de l'accès à la propriété " + subProperty + '.', e);
+					}
+				}
+				this.customParameters.put(customParameterConfig.getKey(), Arrays.asList(content));
 			} else if ("escapeSql".equals(action)) {
-				final Object src = e.getValue().get("sourceParam");
+				final Object src = customParameterConfig.getValue().get("sourceParam");
 				final List<?> srcValue = this.getParamValues(src.toString());
 				if (srcValue != null) {
-					this.customParameters.put(e.getKey(),
+					this.customParameters.put(customParameterConfig.getKey(),
 							srcValue.stream().map(o -> o == null ? null : o.toString().replaceAll("'", "''")).collect(Collectors.toList()));
 				} else {
-					this.customParameters.remove(e.getKey());
+					this.customParameters.remove(customParameterConfig.getKey());
 				}
 			} else if ("pathParam".equals(action)) {
 				Request request = getRequest();
-				if (request != null && !StringUtils.isEmpty(request.getUrl()) && e.getValue().get("index") != null) {
+				if (request != null && !StringUtils.isEmpty(request.getUrl()) && customParameterConfig.getValue().get("index") != null) {
 					String[] split = request.getUrl().split("/");
-					Integer index = (Integer) e.getValue().get("index");
+					Integer index = (Integer) customParameterConfig.getValue().get("index");
 					if (index < split.length) {
-						customParameters.put(e.getKey(), Collections.singletonList(split[index]));
+						customParameters.put(customParameterConfig.getKey(), Collections.singletonList(split[index]));
 					} else {
 						throw new WireMockCsvException("Index PathParam supérieur au nombre d'argument trouvé dans le path");
 					}

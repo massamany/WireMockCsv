@@ -62,16 +62,15 @@ public class JsonConverter {
 	}
 
 	/**
-	 * Conversion d'un json quelconque en map.
+	 * Conversion d'un json quelconque en objet.
 	 * @param jsonContent JSon content to convert
-	 * @return Map
+	 * @return Object
 	 * 
 	 * @throws WireMockCsvException When a technical exception occurs
 	 */
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> convertJsonToMap(final String jsonContent) throws WireMockCsvException {
+	public <T> T convertJsonToObject(final String jsonContent, Class<T> clazz) throws WireMockCsvException {
 		try {
-			return JsonConverter.MAPPER.readValue(jsonContent, Map.class);
+			return JsonConverter.MAPPER.readValue(jsonContent, clazz);
 		} catch (final JsonProcessingException e) {
 			throw new WireMockCsvException("Erreur lors de la convertion en JSON : " + e.getMessage(), e);
 		} catch (final IOException e) {
@@ -161,7 +160,7 @@ public class JsonConverter {
 			if (! line.isMasked(line.getColumns()[i])) {
 				if (line.isConsideredAsJson(line.getColumns()[i])) {
 					this.addFieldToObject(obj, line.getColumns()[i].split("__"), 
-							line.getResult()[i] == null ? null : this.convertJsonToMap(line.getResult()[i].toString()));
+							line.getResult()[i] == null ? null : this.convertJsonToObject(line.getResult()[i].toString(), Object.class));
 				} else {
 					this.addFieldToObject(obj, line.getColumns()[i].split("__"), line.getResult()[i]);
 				}

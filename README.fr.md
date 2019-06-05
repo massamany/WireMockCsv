@@ -313,6 +313,7 @@ Les opérations suivantes sont disponibles :
     * "sourceParam": Le nom du paramètre contenant les valeurs à échapper.
 * fromPreviousResponse: Permet de récupérer le body de la réponse précédente, fournie en paramètre à WireMockCsv, pour le placer dans une variable. Paramètres :
     * "action": "fromPreviousResponse",
+    * "subProperty": Nom de la sous propriété à extraire du contenu JSon du template.
 * "pathParam": Permet de récupérer une variable dans le path pour l'injecter dans un paramètre. Paramètres :
     * "action": "pathParam",
     * "index": Index du path param. Attention, numérotation à partir de "1". Exemple : avec le path `/mock/123/test` alors `123` sera en position 2.
@@ -410,9 +411,16 @@ Voir l'exemple "articlesFromTemplate" pour la mise en place.
 
 Les données générées par l'extension en amont seront incluses dans les données rendues par WireMockCsv.
 
+Le concept est de positionner le contenu intégrale du template dans un custom parameter, ou une ou plusieurs partie(s) de ce template dans un ou plusieurs custom parameter(s).
+
+Ensuite, la(les) variable(s) sera(seront) utilisée(s) dans la requête SQL, sachant que son(leur) contenu doit être considéré comme du JSon.
+
 Pour obtenir ce résultat, il est nécessaire de passer par un "customParameters" avec l'action "fromPreviousResponse" et d'activer le paramère "considerAsJson".
 
-Voir l'exemple "articlesIncludesTemplate" pour la mise en place.
+Voir les exemples suivant pour la mise en place
+* "articlesIncludesTemplate" : utilisation du template entier
+* "articlesIncludesTemplate2" : utilisation d'une sous partie du template
+* "articlesIncludesTemplate3" : utilisation de plusieurs parties du template
 
 ### Fournir du contenu pour une extension en aval
 
@@ -457,6 +465,8 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 * Recherche d'articles avec ou sans filtre (i.e. idem que précédemment) mais incluant le body json de la réponse précedente
     * http://localhost:8181/articlesIncludesTemplate
     * http://localhost:8181/articlesIncludesTemplate?filtreLibelle=Cla
+    * http://localhost:8181/articlesIncludesTemplate2 (Uniquement une partie du template)
+    * http://localhost:8181/articlesIncludesTemplate3 (2 parties du template exploitées séparément)
 
 * Recherche de factures avec ou sans filtre, avec agrégation de données et changement de structure de résultat. Deux syntaxes présentées
     * http://localhost:8181/rechercherFactures
