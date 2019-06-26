@@ -34,17 +34,30 @@ public final class WireMockCsvUtils {
 		//TODO A optimiser : ne faire la conversion JSon que si nécessaire (via un DynamicCharSequence par exemple)
 		String json = jsonConverter.convertObjectToJson(result);
 		String body = Pattern.compile("\\\"?\\$\\{WireMockCsv\\}\\\"?").matcher(jsonStructure).replaceAll(Matcher.quoteReplacement(json));
+
+		body = Pattern.compile("\\\"?\\$\\{as-string:WireMockCsv\\}\\\"?").matcher(body).replaceAll(result == null ? "" : Matcher.quoteReplacement(result.toString()));
+		
 		
 		// Partie 2: Remplacement des variantes.
 		HashMap<String, Object> holder = new HashMap<>();
 		holder.put("WireMockCsv", result);
-		Matcher m = Pattern.compile("\\\"?\\$\\{(WireMockCsv[\\.\\[][^\\}]*)}\\\"?").matcher(jsonStructure);
+		Matcher m = Pattern.compile("\\\"?\\$\\{(WireMockCsv[\\.\\[][^\\}]*)}\\\"?").matcher(body);
 		while (m.find()) {
 			final String subName = m.group(1);
 			try {
 				Object subValue = BeanUtilsBean.getInstance().getPropertyUtils().getProperty(holder, subName);
 				String subJson = jsonConverter.convertObjectToJson(subValue);
 				body = body.replaceAll("\\\"?\\$\\{" + Pattern.quote(subName) + "}\\\"?", Matcher.quoteReplacement(subJson));
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+				throw new WireMockCsvException("Erreur lors de l'accès à la propriété " + subName + '.', e);
+			}
+		}
+		m = Pattern.compile("\\\"?\\$\\{(as-string:WireMockCsv[\\.\\[][^\\}]*)}\\\"?").matcher(body);
+		while (m.find()) {
+			final String subName = m.group(1);
+			try {
+				Object subValue = BeanUtilsBean.getInstance().getPropertyUtils().getProperty(holder, subName.replace("as-string:", ""));
+				body = body.replaceAll("\\\"?\\$\\{" + Pattern.quote(subName) + "}\\\"?", Matcher.quoteReplacement(subValue == null ? "" : subValue.toString()));
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				throw new WireMockCsvException("Erreur lors de l'accès à la propriété " + subName + '.', e);
 			}

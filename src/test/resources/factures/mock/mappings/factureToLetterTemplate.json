@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/factureToLetterTemplate",
+    "queryParameters" : {
+      "factureCode" : {
+        "matches" : "..*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "text/html; charset=utf-8" },
+    "transformerParameters":{
+      "useResponseBodyAsStructure": "true",
+      "query": [
+        "SELECT c.\"civilite\" as \"client__civilite\", c.\"nom\" as \"client__nom\", c.\"prenom\" as \"client__prenom\",",
+        "f.\"code\" as \"facture__code\", f.\"dateCommande\" as \"facture__date\",",
+        "(select sum(\"nombre\" * (select \"prix\" from article a where a.\"code\" = l.\"articleCode\")) from ligne_facture l where l.\"factureCode\" = f.\"code\") as \"facture__montantTotal\"",
+        "FROM facture f JOIN client c ON f.\"clientCode\" = c.\"code\" WHERE f.\"code\" = '${factureCode}'"
+      ],
+      "resultType":"object"
+    },
+    "bodyFileName": "letterTemplate.html",
+    "transformers": ["response-template", "wiremock-csv"]
+  }
+}

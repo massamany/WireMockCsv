@@ -99,10 +99,17 @@ Exemple de changement de structure :
       "donnees": "${WireMockCsv}"
     }
 
+Il est aussi possible de récupérer les champs du JSon généré. La syntaxe d'Apache commons Bean Utils est à suivre, par exemple: 
+
+    "structure": {
+      "date": "${WireMockCsv.facture.date}",
+      "donnees": "${WireMockCsv}"
+    }
+
 * Baser le rendering sur un template, avec le paramètre `useResponseBodyAsStructure` (voir le chapitre Chaîner les extensions)
 
 A noter que le paramètre ${WireMockCsv} représente l'intégralité du JSon généré par le requêtage.
-Il est possible de récupérer des sous-parties du résultat du requêtage pour obtenir une personnalisation plus fine de la structure. La syntaxe est celle d'Apache commons Bean Utils.
+Il est possible de récupérer des sous-parties du résultat du requêtage pour obtenir une personnalisation plus fine de la structure. La syntaxe est toujours celle d'Apache commons Bean Utils.
 
 Ceci est particulièrement intéressant pour la surcharge spécifique à la requête.
 
@@ -407,6 +414,16 @@ Ce body doit donc comporter la variable `${WireMockCsv}` pour qu'elle soit rempl
 
 Voir l'exemple "articlesFromTemplate" pour la mise en place.
 
+D'autres options sont disponibles :
+* Récupérer les champs du JSon, par exemple `${WireMockCsv.facture.lignes[0].articleCode}`
+* Utiliser un template non-JSon. WireMockCsv est fait pour générer du JSon. Dans ce cas, ces règles doivent être suivies :
+** Le header de la response ne doit pas être "application/json".
+** Il est possible d'injecter des données non-JSon dans le template. Utiliser la syntaxe suivante : `${to-string:WireMockCsv.invoice.lines[0].articleCode}`.
+
+Voir l'exemple "factureToLetterTemplate" pour illustrer ces options.
+
+A noter que WireMockCsv n'est pas un moteur de templating. Les possibilités offertes sont donc très limitées. Pour des opérations plus complexes, une extensions de templating en aval de WireMockCsv sera plus efficaces.
+
 #### Utiliser le rendu de WireMockCsv comme template principal
 
 Les données générées par l'extension en amont seront incluses dans les données rendues par WireMockCsv.
@@ -538,6 +555,7 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 * Introduced extension chaining
 * Now handling path variables
 * Possibility to reference result sub properties in template structure
+* Possibility to use non-JSon templates
 * Improved compatibility with various wiremock versions
 * (Fix) wiremockcsv launcher now accepts to load other extensions
 * (Fix) regex for variable replacement
