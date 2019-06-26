@@ -17,6 +17,7 @@ import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.ResponseTransformer;
+import com.github.tomakehurst.wiremock.http.HttpHeader;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.http.Response.Builder;
@@ -95,7 +96,12 @@ public class WireMockCsv extends ResponseTransformer {
 					body = responseNotFound instanceof String ? (String) responseNotFound : this.jsonConverter.convertObjectToJson(responseNotFound);
 				}
 			}
-			builder.body(this.jsonConverter.formatJson(body));
+			HttpHeader contentType = response.getHeaders().getHeader("Content-Type");
+			String formatedBody = body;
+			if (contentType != null && contentType.values().stream().anyMatch(e -> e.contains("application/json"))) {
+				formatedBody = this.jsonConverter.formatJson(body);
+			}
+			builder.body(formatedBody);
 			return builder.build();
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);

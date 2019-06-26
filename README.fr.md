@@ -82,6 +82,13 @@ Exemple de changement de structure :
       "donnees": "${WireMockCsv}"
     },
 
+Il est aussi possible de récupérer les champs du JSon généré. La syntaxe de commons beanutils est à suivre, par exemple: 
+
+    "structure": {
+      "date": "${WireMockCsv.facture.date}",
+      "donnees": "${WireMockCsv}"
+    }
+
 * Baser le rendering sur un template, avec le paramètre `useResponseBodyAsStructure` (voir le chapitre Chaîner les extensions)
 
 Le requêtage permet de :
@@ -350,6 +357,16 @@ Le body provisoire de la réponse fourni en entrée de l'extension n'est donc pa
 Ce body doit donc comporter la variable `${WireMockCsv}` pour qu'elle soit remplacée par le contenu généré par l'extension WireMockCsv.
 
 Voir l'exemple "articlesFromTemplate" pour la mise en place.
+
+D'autres options sont disponibles :
+* Récupérer les champs du JSon, par exemple `${WireMockCsv.facture.lignes[0].articleCode}`
+* Utiliser un template non-JSon. WireMockCsv est fait pour générer du JSon. Dans ce cas, ces règles doivent être suivies :
+** Le header de la response ne doit pas être "application/json".
+** Il est possible d'injecter des données non-JSon dans le template. Utiliser la syntaxe suivante : `${to-string:WireMockCsv.invoice.lines[0].articleCode}`.
+
+Voir l'exemple "factureToLetterTemplate" pour illustrer ces options.
+
+A noter que WireMockCsv n'est pas un moteur de templating. Les possibilités offertes sont donc très limitées. Pour des opérations plus complexes, une extensions de templating en aval de WireMockCsv sera plus efficaces.
 
 #### Utiliser le rendu de WireMockCsv comme template principal
 

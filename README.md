@@ -79,7 +79,14 @@ Structure change example:
 
     "structure": {
       "main": "${WireMockCsv}"
-    },
+    }
+
+You can also retrieve nested fields of the generated JSon. Just follow common beanutils syntax, for example: 
+
+    "structure": {
+      "date": "${WireMockCsv.invoice.date}",
+      "content": "${WireMockCsv}"
+    }
 
 * Base the rendering on a template, with the parameter `useResponseBodyAsStructure` (see Chaining extensions chapter)
 
@@ -350,6 +357,16 @@ This body must include the variable `${WireMockCsv}` so that it's replaced by th
 
 See example "articlesFromTemplate".
 
+Other options are available:
+* Retrieve nested fields of the JSon, for example `${WireMockCsv.invoice.lines[0].articleCode}`
+* Use a non-JSon template. WireMockCsv is made to generate JSon. In this case, these rules are to be followed:
+** The header of the response must not be "application/json".
+** You might want to inject non-JSon data into the template. Use the following syntax: `${to-string:WireMockCsv.invoice.lines[0].articleCode}`.
+
+See example "factureToLetterTemplate" to illustrate these options.
+
+Please note that WireMockCsv is not a templating engine. Possibilities are limited. For more complex operations, a templating extension using WireMockCsv output will be more efficient.
+
 #### Use the WireMockCsv response as main template
 
 The data rendered by the previous extension will be included in the data rendered by WireMockCsv.
@@ -397,6 +414,9 @@ In addition, this example uses a global configuration file allowing to change th
 * Search articles (i.e. same as previous) but based on a templated response
     * http://localhost:8181/articlesFromTemplate
     * http://localhost:8181/articlesFromTemplate?filtreLibelle=Cla
+
+* Generated an html letter based on a template
+    * http://localhost:8181/factureToLetterTemplate?factureCode=FAC01
 
 * Search articles (i.e. same as previous) but including the json body from the previous response
     * http://localhost:8181/articlesIncludesTemplate
