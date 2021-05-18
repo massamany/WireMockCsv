@@ -399,9 +399,15 @@ In addition, this example uses a global configuration file allowing to change th
 	* http://localhost:8181/testCustomParamFromQuery3
 	* http://localhost:8181/testCustomParamInSubQuery (custom parameters in sub queries, since 1.1.0)
 
+* Post Json Payload to wiremock to apply parameters from Json Request Body
+curl -X POST --data '{ "request":[ {"customer":"4103446", "ExcludePromotion":"yes", "products":[{"product":"4099073", "quantity": 13}] } ] }' -H "Content-Type:application/json" http://localhost:8181/prices
 
 ## Changes history:
 
+### 1.1.2
+
+* Feature: Use Json request body as part of POST methods and extract parameters from Json request to use in SQL queries 
+ 
 ### 1.1.1
 
 * Code cleaning
