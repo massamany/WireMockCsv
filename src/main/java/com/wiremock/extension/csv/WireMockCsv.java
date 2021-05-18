@@ -130,6 +130,12 @@ public class WireMockCsv extends ResponseTransformer {
 			@SuppressWarnings("unchecked")
 			final Map<String, Map<String, Object>> aliases = (Map<String, Map<String, Object>>) queries.get("aliases");
 			result = this.manager.select(query, aliases);
+		} else if (queries.get("jsonParamQuery") != null) {
+			String query = this.getQuery(queries.get("jsonParamQuery"));
+			query = WireMockJsonRequestUtils.replaceQueryVariables(query, requestConfig);
+			@SuppressWarnings("unchecked")
+			final Map<String, Map<String, Object>> aliases = (Map<String, Map<String, Object>>) queries.get("aliases");
+			result = this.manager.select(query, aliases);
 		} else {
 			//Pas de query principale : on simule un resultat de 1 ligne sans colonne, afin de permettre l'exécution de subqueries
 			//d'extraction en masse.
@@ -224,6 +230,7 @@ public class WireMockCsv extends ResponseTransformer {
 		this.putConfigParameter(parameters, queries, "aliases");
 		this.putConfigParameter(parameters, queries, "resultType");
 		this.putConfigParameter(parameters, queries, "noLines");
+		this.putConfigParameter(parameters, queries, "jsonParamQuery");
 		return queries;
 	}
 
