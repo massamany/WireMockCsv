@@ -26,14 +26,14 @@ The "target" directory will then contain several binaries:
 
 This command uses the main class configured in the standalone WireMockCsv jar to launch the app.
 
-    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.1.1-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.1.2-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
 
 ### Full options mode:
 
 Use this command to change runner, classpath, load other extensions, etc ...
 
     java -Dfile.encoding=UTF-8 -Dcsv-root-dir="###MY_PROJECT_PATH###\src\test\resources\mock" \
-    -cp "wiremock-standalone-2.9.0.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.1.1-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
+    -cp "wiremock-standalone-2.27.2.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.1.2-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
     com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --port 8181 --global-response-templating  --verbose  --root-dir "###MY_ROOT_DIR###" \
     --extensions com.wiremock.extension.csv.WireMockCsv,tv.teads.wiremock.extension.JsonExtractor,tv.teads.wiremock.extension.Calculator,tv.teads.wiremock.extension.FreeMarkerRenderer,tv.teads.wiremock.extension.Randomizer,com.opentable.extension.BodyTransformer,com.github.masonm.JwtMatcherExtension,com.github.masonm.JwtStubMappingTransformer
 
@@ -95,6 +95,7 @@ A request is composed by several components:
     * Main query: It will be replaced with the value of the value of the custom parameter with the same name, or if not found with the value of the HTTP parameter with the same name.
     * Sub-query: It will be replaced with the value of the column with the same name, or if not found with the value of the value of the custom parameter with the same name, or if not found with the value of the HTTP parameter with the same name.
     * A parameter with no replacement values will be replaced by an empty String.
+* "jsonParamQuery": Same as query, additionally this allows parameters to be extracted from Request Body : ${$..jsonObject}. 
 * "conditionQuery": A SQL query meaning to return a value (1 line and column). potentially parameterized with HTTP request parameters or "mother" query results (for sub-queries).
 * "conditions": Map of possible result values for "conditionQuery", for which a specific request can be performed. This allows personnalizing the result and its structure, depending on data. Following predefined values are handled:
     * "undefined" if no result (no line).
