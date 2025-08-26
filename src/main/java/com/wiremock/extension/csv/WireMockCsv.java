@@ -44,7 +44,7 @@ public class WireMockCsv extends ResponseTransformer {
 			this.config = new ConfigHandler(this.manager, this.jsonConverter);
 		} catch (final WireMockCsvException e) {
 			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
-			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.");
+			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.", e);
 		}
 	}
 
@@ -127,12 +127,6 @@ public class WireMockCsv extends ResponseTransformer {
 		} else if (queries.get("query") != null) {
 			String query = this.getQuery(queries.get("query"));
 			query = WireMockCsvUtils.replaceQueryVariables(query, requestConfig);
-			@SuppressWarnings("unchecked")
-			final Map<String, Map<String, Object>> aliases = (Map<String, Map<String, Object>>) queries.get("aliases");
-			result = this.manager.select(query, aliases);
-		} else if (queries.get("jsonParamQuery") != null) {
-			String query = this.getQuery(queries.get("jsonParamQuery"));
-			query = WireMockJsonRequestUtils.replaceQueryVariables(query, requestConfig);
 			@SuppressWarnings("unchecked")
 			final Map<String, Map<String, Object>> aliases = (Map<String, Map<String, Object>>) queries.get("aliases");
 			result = this.manager.select(query, aliases);
@@ -230,7 +224,6 @@ public class WireMockCsv extends ResponseTransformer {
 		this.putConfigParameter(parameters, queries, "aliases");
 		this.putConfigParameter(parameters, queries, "resultType");
 		this.putConfigParameter(parameters, queries, "noLines");
-		this.putConfigParameter(parameters, queries, "jsonParamQuery");
 		return queries;
 	}
 

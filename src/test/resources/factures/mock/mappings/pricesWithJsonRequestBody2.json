@@ -1,13 +1,22 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/prices"
+    "urlPath": "/prices2"
   },
   "response": {
     "status": 200,
     "headers": { "Content-Type": "application/json; charset=utf-8" },
     "transformerParameters":{
       "structure": {"jsonBody": { "batchId" : "123" ,"content": "${WireMockCsv}" } },
+      "customParameters": {
+        "productCodesIn": {
+          "action": "concatenate",
+          "sourceParam": "@{$..product}",
+          "prefix": "('",
+          "suffix": "')",
+          "separator": "','"
+        }
+      },
       "query":["SELECT a.\"product\" as \"inputData__product\" ,",
       "a.\"quantity\" as \"inputData__quantity\", a.\"customer\" as \"inputData__customer\",",
       "a.\"ExcludePromotion\"  as \"inputData__ExcludePromotion\",",
@@ -16,7 +25,7 @@
       "a.\"netPricePerUnit\" as \"result__results__netPricePerUnit__amount\" ,",
       "a.\"discount\" as \"result__results__priceValue__discount\" ,",
       "a.\"discount2\" as \"result__results__priceValue__discount2\" ",
-      " FROM prices a WHERE a.\"product\" = '@{$..product}'"]
+      " FROM prices a WHERE a.\"product\" in ${productCodesIn}"]
     },
     "transformers": ["wiremock-csv"]
   }

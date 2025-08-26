@@ -18,8 +18,12 @@ import com.github.tomakehurst.wiremock.common.ListOrSingle;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.TemplateEngine;
+import com.github.tomakehurst.wiremock.http.Body;
 import com.github.tomakehurst.wiremock.http.Request;
+import com.jayway.jsonpath.JsonPath;
 import com.wiremock.extension.csv.QueryResults.QueryResult;
+
+import wiremock.com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Permet de gérer la configuration et les paramètres à l'exécution d'une requête.<br>
@@ -193,12 +197,7 @@ public class ConfigHandler {
 
 		@Override
 		public Object getParamValue(final String paramName) {
-			List<?> value;
-			if (this.getCustomParameters() != null && this.getCustomParameters().containsKey(paramName)) {
-				value = this.getCustomParameters().get(paramName);
-			} else {
-				value = this.requestParams.get(paramName);
-			}
+			List<?> value = getParamValues(paramName);
 			return value == null || value.isEmpty() ? null : value.get(0);
 		}
 
@@ -208,7 +207,13 @@ public class ConfigHandler {
 			if (this.getCustomParameters() != null && this.getCustomParameters().containsKey(paramName)) {
 				value = this.getCustomParameters().get(paramName);
 			} else {
-				value = this.requestParams.get(paramName);
+			    if (paramName.startsWith("@{") && paramName.endsWith("}")) {
+			        Body body = new Body(request.getBody());
+			        String jsonString = body.asString();
+	                return JsonPath.read(jsonString, paramName.substring(2, paramName.length() - 1).trim());
+			    } else {
+			        value = this.requestParams.get(paramName);
+			    }
 			}
 			return value;
 		}
