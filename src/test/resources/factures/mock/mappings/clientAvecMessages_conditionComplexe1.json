@@ -28,7 +28,7 @@
               "query":"values ('Bon client')"
             },
             "F": {
-              "query":"values ('Client fidèle')"
+              "query":"values ('Client fidÃ¨le')"
             }
           },
           "resultType":"value"

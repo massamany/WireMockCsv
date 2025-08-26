@@ -24,7 +24,7 @@ public class WireMockCsvServerRunner {
 		args2[args.length] = "--extensions";
 		args2[args.length + 1] = "com.wiremock.extension.csv.WireMockCsv";
 
-		WireMockServerRunner.main(args2);
+		new WireMockServerRunner().run(args2);
 	}
 
 	/**

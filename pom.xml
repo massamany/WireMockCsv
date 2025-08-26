@@ -5,7 +5,7 @@
 
 	<groupId>com.github.massamany</groupId>
 	<artifactId>wiremockcsv</artifactId>
-	<version>1.1.2</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>WireMockCsv</name>
@@ -58,9 +58,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.github.tomakehurst</groupId>
+			<groupId>org.wiremock</groupId>
 			<artifactId>wiremock-standalone</artifactId>
-			<version>2.27.2</version>
+			<version>3.13.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.ow2.asm</groupId>

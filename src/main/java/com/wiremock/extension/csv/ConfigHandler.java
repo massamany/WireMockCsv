@@ -14,9 +14,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.common.ListOrSingle;
+import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.RequestTemplateModel;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.TemplateEngine;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.wiremock.extension.csv.QueryResults.QueryResult;
 
@@ -160,7 +161,8 @@ public class ConfigHandler {
 
 		public RootConfigHandler(final Request request, final Parameters transformerParameters) throws WireMockCsvException {
 			this.request = request;
-			this.requestParams = RequestTemplateModel.from(request).getQuery();
+			RequestTemplateModel requestModel = (RequestTemplateModel) TemplateEngine.defaultTemplateEngine().buildModelForRequest(request).get("request");
+            this.requestParams = requestModel.getQuery();
 			this.transformerParameters = transformerParameters;
 			@SuppressWarnings("unchecked")
 			final Map<String, Map<String, Object>> customParametersConfig =

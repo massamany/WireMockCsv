@@ -33,7 +33,7 @@
               "query":"values ('Status ${status} : Bon client')"
             },
             "F": {
-              "query":"values ('Status ${status} : Client fidèle')"
+              "query":"values ('Status ${status} : Client fidÃ¨le')"
             },
             "default": {
               "query":"values ('Status ${status} : Inconnu')"
