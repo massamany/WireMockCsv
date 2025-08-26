@@ -1,7 +1,7 @@
 ﻿﻿
 # Extension Wiremock CSV
 
-![Build status](https://api.travis-ci.org/massamany/WireMockCsv.svg "Build status") 
+![Build status](https://api.travis-ci.com/massamany/WireMockCsv.svg "Build status") 
 
 *Lire cette documentation dans une autre langue : [English](README.md).*
 
@@ -26,14 +26,14 @@ Le répertoire "target" contiendra alors :
 
 Cette commande permet d'utiliser la main class configurée dans le jar autonome WireMockCsv pour effectuer le lancement.
 
-    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.1.1-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.2.0-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
 
 ### Lancement toutes options:
 
 Utiliser cette commande pour varier le runner, le classpath, utiliser d'autres extensions, etc ...
 
     java -Dfile.encoding=UTF-8 -Dcsv-root-dir="###MY_PROJECT_PATH###\src\test\resources\mock" \
-    -cp "wiremock-standalone-2.9.0.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.1.1-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
+    -cp "wiremock-standalone-3.13.1.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.2.0-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
     com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --port 8181 --global-response-templating  --verbose  --root-dir "###MY_ROOT_DIR###" \
     --extensions com.wiremock.extension.csv.WireMockCsv,tv.teads.wiremock.extension.JsonExtractor,tv.teads.wiremock.extension.Calculator,tv.teads.wiremock.extension.FreeMarkerRenderer,tv.teads.wiremock.extension.Randomizer,com.opentable.extension.BodyTransformer,com.github.masonm.JwtMatcherExtension,com.github.masonm.JwtStubMappingTransformer
 
@@ -96,6 +96,7 @@ Un requêtage est constitué de plusieurs composants :
     * Requête principale : Il sera remplacé par la valeur paramètre custom du même nom ou à défaut par la valeur du paramètre HTTP du même nom
     * Sous requête : Il sera remplacé par la valeur de la colonne du même nom ou à défaut par la valeur paramètre custom du même nom ou à défaut par la valeur du paramètre HTTP du même nom
     * Un paramètre n'ayant pas de valeur de remplacement sera remplacé par une chaîne vide
+* "jsonParamQuery": Pareil que "query", mais en permettant l'extraction de paramètre depuis le body de la requête : ${$..jsonObject}. 
 * "conditionQuery" : Une requête SQL ne devant retourner qu'une valeur (une ligne et une colonne). Potentiellement paramétrée avec soit les paramètres HTTP (pour la requête principale), soit les résultats de la requête mère (pour les sous-requêtes).
 * "conditions" : Map de valeurs possibles issue de "conditionQuery", pour lesquelles un requêtage personnalisé peut être réalisé. Ceci permet de personnaliser le résultat et éventuellement sa structure, en fonction des données. La valeur prédéfinie suivantes sont gérées :
     * "undefined" si pas de résultat (aucune ligne).
@@ -399,8 +400,19 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 	* http://localhost:8181/testCustomParamFromQuery3
 	* http://localhost:8181/testCustomParamInSubQuery (paramètres custom dans sub queries, depuis 1.1.0)
 
+* Post Json Payload to wiremock to apply parameters from Json Request Body
+curl -X POST --data '{ "request":[ {"customer":"4103446", "ExcludePromotion":"yes", "products":[{"product":"4099073", "quantity": 13}] } ] }' -H "Content-Type:application/json" http://localhost:8181/prices
+
 
 ## Changes history:
+
+### 1.2.0
+
+* Update to wiremock 3.13.1
+
+### 1.1.2
+
+* Feature: Utiliser le body Json de la requête http POST et en extraite les paramètre pour utilisation dans les requêtes SQL.
 
 ### 1.1.1
 

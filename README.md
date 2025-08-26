@@ -1,7 +1,7 @@
 ﻿
 # Wiremock CSV Extension
 
-![Build status](https://api.travis-ci.org/massamany/WireMockCsv.svg "Build status") 
+![Build status](https://api.travis-ci.com/massamany/WireMockCsv.svg "Build status") 
 
 *Read this documentation in other language: [Français](README.fr.md).*
 
@@ -26,14 +26,14 @@ The "target" directory will then contain several binaries:
 
 This command uses the main class configured in the standalone WireMockCsv jar to launch the app.
 
-    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.1.2-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.2.0-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
 
 ### Full options mode:
 
 Use this command to change runner, classpath, load other extensions, etc ...
 
     java -Dfile.encoding=UTF-8 -Dcsv-root-dir="###MY_PROJECT_PATH###\src\test\resources\mock" \
-    -cp "wiremock-standalone-2.27.2.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.1.2-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
+    -cp "wiremock-standalone-3.13.1.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.2.0-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
     com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --port 8181 --global-response-templating  --verbose  --root-dir "###MY_ROOT_DIR###" \
     --extensions com.wiremock.extension.csv.WireMockCsv,tv.teads.wiremock.extension.JsonExtractor,tv.teads.wiremock.extension.Calculator,tv.teads.wiremock.extension.FreeMarkerRenderer,tv.teads.wiremock.extension.Randomizer,com.opentable.extension.BodyTransformer,com.github.masonm.JwtMatcherExtension,com.github.masonm.JwtStubMappingTransformer
 
@@ -403,6 +403,10 @@ In addition, this example uses a global configuration file allowing to change th
 curl -X POST --data '{ "request":[ {"customer":"4103446", "ExcludePromotion":"yes", "products":[{"product":"4099073", "quantity": 13}] } ] }' -H "Content-Type:application/json" http://localhost:8181/prices
 
 ## Changes history:
+
+### 1.2.0
+
+* Update to wiremock 3.13.1
 
 ### 1.1.2
 
