@@ -5,7 +5,7 @@
 
 	<groupId>com.github.massamany</groupId>
 	<artifactId>wiremockcsv</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<packaging>jar</packaging>
 
 	<name>WireMockCsv</name>

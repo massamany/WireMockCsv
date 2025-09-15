@@ -407,6 +407,12 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 
 ## Changes history:
 
+### 1.2.2
+
+* Fix précédente evolution ajoutée en 1.1.2 :
+  - Seules les Strings fonctionnaient avec l'utilisation du body Json de la requête
+* Overture de certaines variables internes à l'application utilisatrice
+
 ### 1.2.1
 
 * Fix précédente evolution ajoutée en 1.1.2 :
