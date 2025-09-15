@@ -34,9 +34,9 @@ public class DbManager {
 	 */
 	public void dbConnect() throws WireMockCsvException {
 		try {
-			Class.forName("org.hsqldb.jdbcDriver").newInstance();
+			Class.forName("org.hsqldb.jdbcDriver").getDeclaredConstructor().newInstance();
 			this.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + this.csvPath, "CSV", "");
-		} catch (final InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+		} catch (final Exception e) {
 			throw new WireMockCsvException("Erreur lors de la création de la base de données CSV : " + e.getMessage(), e);
 		}
 	}
@@ -72,4 +72,11 @@ public class DbManager {
 		}
 	}
 
+    public Connection getDbConnection() {
+        return dbConnection;
+    }
+
+    public String getCsvPath() {
+        return csvPath;
+    }
 }

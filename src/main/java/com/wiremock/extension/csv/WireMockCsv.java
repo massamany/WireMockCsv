@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.common.Notifier;
+import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.extension.ResponseTransformer;
 import com.github.tomakehurst.wiremock.http.Request;
@@ -33,9 +34,15 @@ public class WireMockCsv extends ResponseTransformer {
 	private final DbManager manager;
 	private final JsonConverter jsonConverter;
 	private final ConfigHandler config;
+    private final Notifier wiremockNotifier;
 
-	public WireMockCsv() throws WireMockCsvException {
+    public WireMockCsv() throws WireMockCsvException {
+        this(new Slf4jNotifier(false));
+    }
+
+    public WireMockCsv(Notifier wiremockNotifier) throws WireMockCsvException {
 		try {
+            this.wiremockNotifier = wiremockNotifier;
 			this.jsonConverter = new JsonConverter();
 
 			this.manager = new DbManager(this.getCsvDbPath());
@@ -43,12 +50,12 @@ public class WireMockCsv extends ResponseTransformer {
 
 			this.config = new ConfigHandler(this.manager, this.jsonConverter);
 		} catch (final WireMockCsvException e) {
-			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
+		    wiremockNotifier.error(e.getMessage(), e);
 			throw new WireMockCsvException("Erreur lors de l'initialisation de l'extension CSV.", e);
 		}
 	}
 
-	@Override
+    @Override
 	public String getName() {
 		return "wiremock-csv";
 	}
@@ -58,7 +65,23 @@ public class WireMockCsv extends ResponseTransformer {
 		return false;
 	}
 
-	@Override
+    public DbManager getManager() {
+        return manager;
+    }
+
+    public JsonConverter getJsonConverter() {
+        return jsonConverter;
+    }
+
+    public ConfigHandler getConfig() {
+        return config;
+    }
+
+    public Notifier getWiremockNotifier() {
+        return wiremockNotifier;
+    }
+
+    @Override
 	public Response transform(final Request request, final Response response, final FileSource files,
 			final Parameters parameters) {
 		try {
@@ -96,7 +119,8 @@ public class WireMockCsv extends ResponseTransformer {
 			builder.body(this.jsonConverter.formatJson(body));
 			return builder.build();
 		} catch (final WireMockCsvException e) {
-			WireMockConfiguration.wireMockConfig().notifier().error(e.getMessage(), e);
+			final Notifier notifier = wiremockNotifier;
+            notifier.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
