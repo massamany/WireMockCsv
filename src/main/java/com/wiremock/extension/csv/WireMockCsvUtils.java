@@ -9,8 +9,6 @@ import com.github.tomakehurst.wiremock.http.Body;
 import com.jayway.jsonpath.JsonPath;
 import com.wiremock.extension.csv.ConfigHandler.RequestConfigHandler;
 
-import wiremock.com.fasterxml.jackson.databind.JsonNode;
-
 public final class WireMockCsvUtils {
 
 	private WireMockCsvUtils() {
@@ -66,8 +64,8 @@ public final class WireMockCsvUtils {
         while (m.find()) {
             final String paramName = m.group(1);
             if (! done.contains(paramName)) {
-                ArrayList<String> paramObject = JsonPath.read(jsonString, paramName);
-                String  paramValue = paramObject.size() > 0 ? paramObject.get(0) : "";
+                ArrayList<Object> paramObject = JsonPath.read(jsonString, paramName);
+                Object  paramValue = paramObject.size() > 0 ? paramObject.get(0) : "";
                 newQuerySQL = newQuerySQL.replaceAll("\\@\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", paramValue.toString());
                 done.add(paramName);
             }
@@ -81,8 +79,8 @@ public final class WireMockCsvUtils {
         while (m.find()) {
             final String paramName = m.group(1);
             if (! done.contains(paramName)) {
-                ArrayList<String> paramObject = JsonPath.read(jsonString, paramName);
-                String  paramValue = paramObject.size() > 0 ? paramObject.get(0) : "";
+                ArrayList<Object> paramObject = JsonPath.read(jsonString, paramName);
+                Object  paramValue = paramObject.size() > 0 ? paramObject.get(0) : "";
                 newQuerySQL = newQuerySQL.replaceAll("\\@\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", paramValue.toString().replaceAll("'", "''"));
                 done.add(paramName);
             }

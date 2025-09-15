@@ -23,8 +23,6 @@ import com.github.tomakehurst.wiremock.http.Request;
 import com.jayway.jsonpath.JsonPath;
 import com.wiremock.extension.csv.QueryResults.QueryResult;
 
-import wiremock.com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * Permet de gérer la configuration et les paramètres à l'exécution d'une requête.<br>
  * Cette classe permet d'empiler la config globale, les paramètres HTTP, les paramètres custom et un ou plusieurs résultats de requête.
