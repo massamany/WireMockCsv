@@ -26,14 +26,14 @@ Le répertoire "target" contiendra alors :
 
 Cette commande permet d'utiliser la main class configurée dans le jar autonome WireMockCsv pour effectuer le lancement.
 
-    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.2.1-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
+    java -Dfile.encoding=UTF-8 -jar ".\WiremockCsv-1.2.3-standalone.jar" --port 8181 --root-dir "###MY_PROJECT_PATH###\src\test\resources\mock"
 
 ### Lancement toutes options:
 
 Utiliser cette commande pour varier le runner, le classpath, utiliser d'autres extensions, etc ...
 
     java -Dfile.encoding=UTF-8 -Dcsv-root-dir="###MY_PROJECT_PATH###\src\test\resources\mock" \
-    -cp "wiremock-standalone-3.13.1.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.2.1-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
+    -cp "wiremock-standalone-3.13.1.jar:wiremock-jwt-extension-0.4.jar:wiremockcsv-1.2.3-with-dependencies.jar:wiremock-extensions_2.11-0.15.jar:wiremock-extensions_teads_2.11-0.15.jar:handlebars-proto-4.1.2.jar:wiremock-body-transformer-1.1.6.jar:handlebars-4.1.2.jar" \
     com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --port 8181 --global-response-templating  --verbose  --root-dir "###MY_ROOT_DIR###" \
     --extensions com.wiremock.extension.csv.WireMockCsv,tv.teads.wiremock.extension.JsonExtractor,tv.teads.wiremock.extension.Calculator,tv.teads.wiremock.extension.FreeMarkerRenderer,tv.teads.wiremock.extension.Randomizer,com.opentable.extension.BodyTransformer,com.github.masonm.JwtMatcherExtension,com.github.masonm.JwtStubMappingTransformer
 
@@ -406,6 +406,11 @@ De plus, cet exemple utilise un fichier de configuration global permettant de ch
 
 
 ## Changes history:
+
+### 1.2.3
+
+* Fix précédente evolution ajoutée en 1.1.2 :
+  - Null check oubliés
 
 ### 1.2.2
 
