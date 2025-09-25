@@ -66,6 +66,7 @@ public final class WireMockCsvUtils {
             if (! done.contains(paramName)) {
                 ArrayList<Object> paramObject = JsonPath.read(jsonString, paramName);
                 Object  paramValue = paramObject.size() > 0 ? paramObject.get(0) : "";
+                paramValue = paramValue == null ? "" : paramValue;
                 newQuerySQL = newQuerySQL.replaceAll("\\@\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", paramValue.toString());
                 done.add(paramName);
             }
@@ -81,6 +82,7 @@ public final class WireMockCsvUtils {
             if (! done.contains(paramName)) {
                 ArrayList<Object> paramObject = JsonPath.read(jsonString, paramName);
                 Object  paramValue = paramObject.size() > 0 ? paramObject.get(0) : "";
+                paramValue = paramValue == null ? "" : paramValue;
                 newQuerySQL = newQuerySQL.replaceAll("\\@\\{\\s*" + Pattern.quote(m.group(1)) + "\\s*\\}", paramValue.toString().replaceAll("'", "''"));
                 done.add(paramName);
             }
